@@ -149,6 +149,19 @@ export const constantRoutes = [
   },
 
   {
+    path: '/account',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        name: 'Account',
+        component: () => import('@/views/account/index'),
+        meta: { title: '账号管理', icon: 'account' }
+      }
+    ]
+  },
+
+  {
     path: 'external-link',
     component: Layout,
     children: [
