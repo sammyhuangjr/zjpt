@@ -1,6 +1,56 @@
 <template>
   <div class="app-container">
-    <el-table
+    <div class="ctx">
+      <span>代理商名称：</span><el-input v-model="input" placeholder="请输入" class="h_input" type="text"></el-input>
+
+      <span>授权平台：</span>
+      <el-select v-model="value" placeholder="请选择">
+        <el-option
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+        </el-option>
+      </el-select>
+
+      <span>创建时间：</span>
+      <div class="block">
+        <el-date-picker
+          v-model="value1"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期">
+        </el-date-picker>
+      </div>
+    </div>
+    <div class="ctx_btn">
+      <el-button type="primary"  @click="dialogFormVisible = true" plain>新增代理商</el-button>
+    </div>
+    <el-dialog title="新增代理商" :visible.sync="dialogFormVisible" width="600px">
+        <el-form :model="form">
+            <el-form-item class="di_input" label="代理商名称：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请输入"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="联系人：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请输入"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="联系手机号：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请输入"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="授权平台：" :label-width="formLabelWidth">
+                <el-checkbox-group v-model="form.type">
+                  <el-checkbox label="美食/餐厅线上活动" name="type"></el-checkbox>
+                  <el-checkbox label="地推活动" name="type"></el-checkbox>
+                </el-checkbox-group>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="dialogFormVisible = false">提 交</el-button>
+        </div>
+    </el-dialog>
+    <el-table class="ctx_t"
       v-loading="listLoading"
       :data="list"
       element-loading-text="Loading"
@@ -71,7 +121,20 @@ export default {
   data() {
     return {
       list: null,
-      listLoading: true
+      listLoading: true,
+      value1: '',//时间范围选择
+      dialogFormVisible: false,
+      formLabelWidth: '120px',
+      form: {
+          name: '',
+          region: '',
+          date1: '',
+          date2: '',
+          delivery: false,
+          type: [],
+          resource: '',
+          desc: ''
+        },
     }
   },
   created() {
@@ -88,3 +151,28 @@ export default {
   }
 }
 </script>
+<style lang="scss">
+  .ctx{
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    .h_input{
+      width: 150px;
+    }
+    span{
+      margin-left: 20px;
+    }
+    // span:nth-child(1){
+    //   margin-left: 0px;
+    // }
+  }
+  .ctx_t{
+    width: 100%;
+    margin-left: 20px;
+  }
+  .ctx_btn{
+    float: right;
+    margin-bottom: 20px;
+  }
+</style>

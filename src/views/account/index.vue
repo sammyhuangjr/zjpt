@@ -8,13 +8,52 @@
             <span>所属代理：</span><el-input v-model="input" placeholder="请输入" class="h_input" type="text"></el-input>
         </div>
         <div class="ctx_icon">
-            <svg-icon icon-class="refresh" class="h_icon" />
-            <svg-icon icon-class="search"  class="h_icon" />
+          <el-button type="primary" icon="el-icon-refresh-right" circle></el-button>
+          <el-button type="primary" icon="el-icon-search" circle></el-button>
+            <!-- <svg-icon icon-class="refresh" class="h_icon" />
+            <svg-icon icon-class="search"  class="h_icon" /> -->
         </div>
     </div>
+     <div class="ctx_btn">
+      <el-button  icon="el-icon-refresh" circle></el-button>
+      <el-button type="primary" @click="dialogFormVisible = true" plain>新建账号</el-button>
+    </div>
+    <el-dialog title="新建账号" :visible.sync="dialogFormVisible" width="600px">
+        <el-form :model="form">
+            <el-form-item class="di_input" label="用户名：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请输入用户名"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="所属代理：" :label-width="formLabelWidth">
+                <el-select v-model="value" placeholder="请选择所属代理" style="width:380px">
+                    <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                    </el-option>
+                 </el-select>
+            </el-form-item>
+            <el-form-item class="di_input" label="密码：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请输入密码"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="确认密码：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请再次输入密码"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="联系电话：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请再次手机号"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="备注：" :label-width="formLabelWidth">
+                <el-input type="textarea" v-model="form.desc"></el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="dialogFormVisible = false">提 交</el-button>
+        </div>
+    </el-dialog>
     <el-table class="ctx_table"
         ref="multipleTable"
-        :data="tableData"
+        :data="list"
         tooltip-effect="dark"
         @selection-change="handleSelectionChange">
         <el-table-column
@@ -24,7 +63,7 @@
         <el-table-column
         label="用户名"
         width="120">
-        <template slot-scope="scope">{{ scope.row.date }}</template>
+          <template slot-scope="scope">{{ scope.row.author }}</template>
         </el-table-column>
         <el-table-column
         prop="name"
@@ -40,6 +79,9 @@
         prop="address"
         label="创建时间"
         show-overflow-tooltip>
+          <template slot-scope="scope">
+            <span>{{ scope.row.display_time }}</span>
+          </template>
         </el-table-column>
          <el-table-column
         prop="address"
@@ -77,7 +119,19 @@ export default {
     return {
       list: null,
       listLoading: true,
-      input:''
+      input:'',
+      dialogFormVisible: false,
+      form: {
+          name: '',
+          region: '',
+          date1: '',
+          date2: '',
+          delivery: false,
+          type: [],
+          resource: '',
+          desc: ''
+        },
+      formLabelWidth: '120px'
     }
   },
   created() {
@@ -96,19 +150,22 @@ export default {
 </script>
 <style lang="scss">
     .ctx_header{
-        width: 65%;
+        width: 100%;
         height: 150px;
         display: flex;
         align-items: center;
-        justify-content: space-around;
+        span{
+          margin-left: 20px;
+        }
         .ctx_input{
             overflow: hidden;
             .el-input{
-                width: 200px;
+                width: 250px;
             }
         }
         .ctx_icon{
-            width: 100px;
+            width: 150px;
+            margin-left: 20px;
             .h_icon{
                 width: 40px;
                 height: 40px;
@@ -119,7 +176,11 @@ export default {
         }
     }
     .ctx_table{
-        width: 90%;
-        margin: 0 auto;
+        width: 100%;
+        margin-left: 20px;
+    }
+    .ctx_btn{
+      float: right;
+      margin-bottom: 20px;
     }
 </style>

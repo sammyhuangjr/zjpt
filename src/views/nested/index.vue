@@ -1,7 +1,8 @@
 <template>
   <div class="app-container">
     <div class="ctx_header">
-        <span>平台名称：</span><el-input v-model="input" placeholder="请输入" class="h_input" type="text"></el-input>
+        <span>设备sn：</span><el-input v-model="input" placeholder="请输入" class="h_input" type="text"></el-input>
+        <span>接入平台：</span><el-input v-model="input" placeholder="请输入" class="h_input" type="text"></el-input>
         <div class="ctx_icon">
           <el-button type="primary" icon="el-icon-refresh-right" circle></el-button>
           <el-button type="primary" icon="el-icon-search" circle></el-button>
@@ -9,12 +10,32 @@
     </div>
     <div class="ctx_btn">
       <el-button  icon="el-icon-refresh" circle></el-button>
-      <el-button type="primary"  @click="dialogFormVisible = true" plain>新增平台</el-button>
+      <el-button type="primary" @click="dialogFormVisible = true" plain>设备授权</el-button>
     </div>
     <el-dialog title="设备授权" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
-            <el-form-item class="di_input" label="平台名称：" :label-width="formLabelWidth">
-                <el-input v-model="form.name" placeholder="请输入平台名称"></el-input>
+            <el-form-item class="di_input" label="所属代理：" :label-width="formLabelWidth">
+                <el-select v-model="value" placeholder="请选择所属代理商" style="width:380px">
+                    <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item class="di_input" label="设备sn：" :label-width="formLabelWidth">
+                <el-input v-model="form.name" placeholder="请输入设备sn号"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="接入平台：" :label-width="formLabelWidth">
+                <el-select v-model="value" placeholder="请选择接入的平台" style="width:380px">
+                    <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                    </el-option>
+                </el-select>
             </el-form-item>
             <el-form-item class="di_input" label="备注：" :label-width="formLabelWidth">
                 <el-input type="textarea" v-model="form.desc"></el-input>
@@ -38,19 +59,34 @@
         width="55"
       >
       </el-table-column>
-      <el-table-column align="center" label="代理商名称" width="250">
+      <el-table-column align="center" label="所属代理商" width="120">
+        <template slot-scope="scope">
+          {{ scope.row.author }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="设备sn" width="120">
         <template slot-scope="scope">
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="代理商名称" width="200">
+      <el-table-column align="center" label="接入平台" show-overflow-tooltip>
         <template slot-scope="scope">
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="代理商名称" show-overflow-tooltip>
+      <el-table-column align="center" label="接入状态" show-overflow-tooltip>
         <template slot-scope="scope">
           {{ scope.$index }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="在线状态" show-overflow-tooltip>
+        
+          <svg-icon icon-class="online" class="ctx_svg"/> 
+        
+      </el-table-column>
+      <el-table-column align="center" label="接入时间" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.display_time }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="300">
@@ -116,9 +152,11 @@ export default {
 <style lang="scss">
   .ctx_header{
     width: 100%;
-    margin-left: 20px;
     display: flex;
     align-items: center;
+    span{
+          margin-left: 20px;
+    }
     .h_input{
       width: 250px;
     }
@@ -134,8 +172,14 @@ export default {
     margin-left: 20px;
     margin-top: 10px;
     width: 100%;
+    .ctx_svg{
+        width: 30px;
+        height: 30px;
+    }
   }
-  
+  .di_input{
+      width: 500px;
+  }
  
 </style>
 
