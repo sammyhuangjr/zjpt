@@ -96,7 +96,12 @@
         </template>
       </el-table-column>
     </el-table>
-      
+    <el-pagination class="ctx_foot"
+      :page-size="20"
+      :pager-count="5"
+      layout="prev, pager, next"
+      :total="1000">
+    </el-pagination>
   </div>
   
 </template>
@@ -149,7 +154,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .ctx_header{
     width: 100%;
     display: flex;
@@ -176,6 +181,10 @@ export default {
         width: 30px;
         height: 30px;
     }
+  }
+  .ctx_foot{
+    text-align: center;
+    margin-top: 10px;
   }
   .di_input{
       width: 500px;

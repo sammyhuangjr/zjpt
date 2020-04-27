@@ -98,6 +98,12 @@
             </template>
         </el-table-column>
     </el-table>
+    <el-pagination class="ctx_foot"
+      :page-size="20"
+      :pager-count="5"
+      layout="prev, pager, next"
+      :total="1000">
+    </el-pagination>
   </div>
 </template>
 
@@ -148,7 +154,7 @@ export default {
   }
 }
 </script>
-<style lang="scss">
+<style lang="scss" scoped>
     .ctx_header{
         width: 100%;
         height: 150px;
@@ -176,8 +182,12 @@ export default {
         }
     }
     .ctx_table{
-        width: 100%;
-        margin-left: 20px;
+      width: 100%;
+      margin-left: 20px;
+    }
+    .ctx_foot{
+      text-align: center;
+      margin-top: 10px;
     }
     .ctx_btn{
       float: right;

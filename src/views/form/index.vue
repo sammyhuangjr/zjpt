@@ -9,9 +9,9 @@
     </div>
     <div class="ctx_btn">
       <el-button  icon="el-icon-refresh" circle></el-button>
-      <el-button type="primary"  @click="dialogFormVisible = true" plain>新增平台</el-button>
+      <el-button type="primary"  @click="onClickForm" plain>新增平台</el-button>
     </div>
-    <el-dialog title="设备授权" :visible.sync="dialogFormVisible" width="600px">
+    <el-dialog title="新增平台" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
             <el-form-item class="di_input" label="平台名称：" :label-width="formLabelWidth">
                 <el-input v-model="form.name" placeholder="请输入平台名称"></el-input>
@@ -22,52 +22,47 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="dialogFormVisible = false">提 交</el-button>
+            <el-button type="primary" @click="onClickSubmit">提 交</el-button>
         </div>
     </el-dialog>
-    <el-table class="ctx_t"
-      v-loading="listLoading"
-      :data="list"
-      element-loading-text="Loading"
-      border
-      fit
-      highlight-current-row
-    >
-      <el-table-column
-        type="selection"
-        width="55"
-      >
+    <el-table class="ctx_t" v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row >
+      <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column align="center" label="代理商名称" width="250">
+      <el-table-column align="center" label="平台名称" width="250">
         <template slot-scope="scope">
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="代理商名称" width="200">
+      <el-table-column align="center" label="接入时间" width="200">
         <template slot-scope="scope">
           {{ scope.$index }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="代理商名称" show-overflow-tooltip>
+      <el-table-column align="center" label="备注" show-overflow-tooltip>
         <template slot-scope="scope">
           {{ scope.$index }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="300">
         <template slot-scope="scope">
-          <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-          <el-button type="text" size="small">编辑</el-button>
+          <el-button @click="editClick(scope.row)" type="text" size="small">编辑</el-button>
+          <el-button type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
-      
+    <el-pagination class="ctx_foot"
+      :page-size="20"
+      :pager-count="5"
+      layout="prev, pager, next"
+      :total="1000">
+    </el-pagination>
   </div>
   
 </template>
 
 <script>
 import { getList } from '@/api/table'
-
+import { httpRquest } from '@/api/URL'
 export default {
   filters: {
     statusFilter(status) {
@@ -81,7 +76,7 @@ export default {
   },
   data() {
     return {
-      list: null,
+      list: null, //平台列表
       listLoading: true,
       input:'',
       dialogFormVisible: false,
@@ -93,7 +88,8 @@ export default {
           delivery: false,
           type: [],
           resource: '',
-          desc: ''
+          desc: '',
+          author:'',
         },
       formLabelWidth: '120px'
     }
@@ -101,19 +97,42 @@ export default {
   created() {
     this.fetchData();
   },
-  methods: {
+  methods:{
     fetchData() {
       this.listLoading = true
       getList().then(response => {
         this.list = response.data.items
         this.listLoading = false
       })
+
+    },
+
+    //新增
+    onClickForm(){
+      dialogFormVisible = true
+    },
+    onClickSubmit(){
+      var req = {
+        name:'',
+        remarks:'',
+      }
+      // httpRquest(this.URL.ADD,'post',req).then((res)=>{
+      //   console.log('=====>',res)
+      //   // dialogFormVisible = false
+      // })
+      this.newPost(this.URL.ADD,req).then((res)=>{
+        console.log('=>>',res)
+      })  
+    },
+    //编辑
+    editClick(e){
+      console.log(e)
     }
   }
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
   .ctx_header{
     width: 100%;
     margin-left: 20px;
@@ -135,7 +154,12 @@ export default {
     margin-top: 10px;
     width: 100%;
   }
-  
- 
+  .ctx_foot{
+    text-align: center;
+    margin-top: 10px;
+  }
+  .di_input{
+      width: 500px;
+  }
 </style>
 

@@ -117,15 +117,45 @@ export const constantRoutes = [
   },
 
   {
-    path: 'external-link',
+    path: '/sys',
     component: Layout,
+    redirect: '/sys/user',
+    name: '系统管理',
+    meta: {
+      title: '系统管理',
+      icon: 'systemSet'
+    },
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'user',
+        component: () => import('@/views/sys/user/index'), 
+        name: 'user',
+        meta: { title: '用户管理' },
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/sys/role/index'), 
+        name: 'role',
+        meta: { title: '角色管理' },
+      },
+      {
+        path: 'menu',
+        component: () => import('@/views/sys/menu/index'), 
+        name: 'menu',
+        meta: { title: '菜单管理' },
       }
     ]
   },
+  // {
+  //   path: 'external-link',
+  //   component: Layout,
+  //   children: [
+  //     {
+  //       path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
+  //       meta: { title: 'External Link', icon: 'link' }
+  //     }
+  //   ]
+  // },
 
   // 404 page must be placed at the end !!!
   { path: '*', redirect: '/404', hidden: true }
