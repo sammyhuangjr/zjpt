@@ -4,6 +4,6 @@ export function httpRquest(url,method,params){
     return request({
         url: url,
         method: method,
-        params: params
+        data: params
     })
 }

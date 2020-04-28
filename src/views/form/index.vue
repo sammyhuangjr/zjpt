@@ -17,7 +17,7 @@
                 <el-input v-model="form.name" placeholder="请输入平台名称"></el-input>
             </el-form-item>
             <el-form-item class="di_input" label="备注：" :label-width="formLabelWidth">
-                <el-input type="textarea" v-model="form.desc"></el-input>
+                <el-input type="textarea" v-model="form.remarks"></el-input>
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -25,28 +25,28 @@
             <el-button type="primary" @click="onClickSubmit">提 交</el-button>
         </div>
     </el-dialog>
-    <el-table class="ctx_t" v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row >
+    <el-table class="ctx_t" v-if="list" v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row >
       <el-table-column type="selection" width="55">
       </el-table-column>
       <el-table-column align="center" label="平台名称" width="250">
         <template slot-scope="scope">
-          {{ scope.$index }}
+          {{ scope.row.name }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="接入时间" width="200">
         <template slot-scope="scope">
-          {{ scope.$index }}
+          {{ scope.row.createTime }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="备注" show-overflow-tooltip>
         <template slot-scope="scope">
-          {{ scope.$index }}
+          {{ scope.row.remarks }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" width="300">
         <template slot-scope="scope">
-          <el-button @click="editClick(scope.row)" type="text" size="small">编辑</el-button>
-          <el-button type="text" size="small">删除</el-button>
+          <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small">编辑</el-button>
+          <el-button @click="deleteClick(scope.row,scope.$index)" type="text" size="small">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -79,17 +79,13 @@ export default {
       list: null, //平台列表
       listLoading: true,
       input:'',
+      isEdit:false,
+      editId:'',//编辑id
+      editIndex:0,//编辑index
       dialogFormVisible: false,
       form: {
           name: '',
-          region: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-          desc: '',
-          author:'',
+          remarks:'',
         },
       formLabelWidth: '120px'
     }
@@ -100,33 +96,85 @@ export default {
   methods:{
     fetchData() {
       this.listLoading = true
-      getList().then(response => {
-        this.list = response.data.items
-        this.listLoading = false
+      var req = {
+        page:1,
+        limit:20,
+        keyWord:'',
+      }
+      httpRquest(this.URL.PAGE,'GET',{}).then((res)=>{
+        console.log(res)
+        this.list = res.data.records;
+        this.listLoading = false;
       })
 
     },
-
+    //删除
+    deleteClick(e,index){
+      var req = {
+        id:e.id
+      }
+      var delUrl =  `${this.URL.DELETE}?id=${e.id} `;
+      httpRquest(delUrl,'GET',).then((res)=>{
+        console.log(res)
+        if(res.code == 0){
+          this.$message({
+            message: '删除成功',
+            type: 'success'
+          });
+          this.list.splice(index,1);
+        }
+      })
+    },
     //新增
     onClickForm(){
-      dialogFormVisible = true
+      this.form = {};
+      this.dialogFormVisible = true
     },
+    //提交
     onClickSubmit(){
-      var req = {
-        name:'',
-        remarks:'',
+      if(this.isEdit){
+        var req = {
+          name:this.form.name,
+          remarks:this.form.remarks,
+          id:this.editId,
+        } 
+        httpRquest(this.URL.UPDATE,'post',req).then((res)=>{
+          console.log(res)
+          if(res.code == 0){
+            this.$message({
+              message: '编辑成功',
+              type: 'success'
+            });
+            this.dialogFormVisible = false;
+            this.list[editIndex] = req;
+          }
+        })
+      }else{
+        var req = {
+          name:this.form.name,
+          remarks:this.form.remarks,
+        } 
+        httpRquest(this.URL.ADD,'post',req).then((res)=>{
+          console.log('=>>',res)
+          if(res.code == 0){
+            this.$message({
+              message: '新增成功',
+              type: 'success'
+            });
+            this.dialogFormVisible = false;
+            this.list.unshift(res.data);
+          }
+        })
       }
-      // httpRquest(this.URL.ADD,'post',req).then((res)=>{
-      //   console.log('=====>',res)
-      //   // dialogFormVisible = false
-      // })
-      this.newPost(this.URL.ADD,req).then((res)=>{
-        console.log('=>>',res)
-      })  
+      
     },
     //编辑
-    editClick(e){
-      console.log(e)
+    editClick(e,index){
+      this.dialogFormVisible = true;
+      this.form = e;
+      this.editId = e.id;
+      this.isEdit = true;
+      this.editIndex = index;
     }
   }
 }
