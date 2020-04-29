@@ -1,17 +1,20 @@
 <template>
   <div class="app-container">
     <div class="ctx">
-      <span>代理商名称：</span><el-input v-model="input" placeholder="请输入" class="h_input" type="text"></el-input>
+      <span>代理商名称：</span><el-input v-model="nameInput" placeholder="请输入" class="h_input" type="text"></el-input>
       <span>授权平台：</span>
-      <el-select v-model="value" placeholder="请选择">
-        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+      <el-select v-model="platId" placeholder="请选择">
+        <el-option v-for="item in platformList" :key="item.id" :label="item.name" :value="item.id">
         </el-option>
       </el-select>
       <span>创建时间：</span>
       <div class="block">
-        <el-date-picker v-model="value1" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+        <el-date-picker v-model="value1" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
         </el-date-picker>
       </div>
+      <div class="ctx_icon">
+          <el-button type="primary" icon="el-icon-search" circle @click="onSearch"></el-button>
+        </div>
     </div>
     <div class="ctx_btn">
       <el-button type="primary"  @click="onClickAdd" plain>新增代理商</el-button>
@@ -99,10 +102,10 @@
             <el-button type="primary" @click="rechargeSub">提 交</el-button>
         </div>
     </el-dialog>
-    <el-dialog title="充值记录" :visible.sync="dialogRecordVisible" width="600px">
+    <el-dialog title="充值记录" :visible.sync="dialogRecordVisible" width="800px">
         <el-table class="ctx_table" ref="recordTable" :data="record" tooltip-effect="dark">
-          <!-- <el-table-column label="序号" width="120">
-            <template slot-scope="scope">{{ scope.row.$index }}</template>
+          <el-table-column label="序号" width="120">
+            <template slot-scope="scope">{{ scope.$index + 1 }}</template>
           </el-table-column>
           <el-table-column prop="address" label="代理商名称" show-overflow-tooltip>
             <template slot-scope="scope">{{ scope.row.name }}</template>
@@ -117,14 +120,11 @@
           </el-table-column>
           <el-table-column prop="address" label="备注" show-overflow-tooltip>
             <template slot-scope="scope">{{ scope.row.remarks }}</template>
-          </el-table-column> -->
+          </el-table-column>
       </el-table>
     </el-dialog>
-    <el-pagination class="ctx_foot"
-      :page-size="20"
-      :pager-count="5"
-      layout="prev, pager, next"
-      :total="1000">
+    <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="totalNum" @next-click="onClickNext" @prev-click="onClickPre" 
+    @current-change="handleCurrentPage" :current-page.sync="currentPage">
     </el-pagination>
   </div>
 </template>
@@ -147,9 +147,13 @@ export default {
   },
   data() {
     return {
+      totalNum:0,
       list: null,
       listLoading: true,
       value1: '',//时间范围选择
+      startSearchTime:'',//开始时间
+      endSearchTime:'',//结束时间
+      platId:'',//平台选择id
       dialogFormVisible: false,
       dialogRechargeVisible:false,
       dialogRecordVisible:false,
@@ -159,6 +163,9 @@ export default {
       rechargeId:'',//充值id
       formLabelWidth: '120px',
       record:null,//充值记录
+      listPage:1, //列表页数
+      recordPage:1, //充值记录页数
+      currentPage:1,
       form: {
           name: '',
           contact:'',
@@ -171,7 +178,7 @@ export default {
         remarks:''
       },
       totalPlat:[],
-      input:'',
+      nameInput:'',//代理商名称
       options:[],
       value:'',
       checkList:[],
@@ -184,25 +191,54 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      var req = {
-        keyword:'',
-        platformId:'',
-        startSearchTime:'',
-        endSearchTime:'',
-        page:1,
-        limit:10
-      }
-      httpRquest(this.URL.AGENT_LIST,'GET',req).then((res)=>{
-        console.log(res);
-        this.list = res.data.records;
-        this.listLoading = false;
-      })
+      this.getAgentList();
       httpRquest(this.URL.PLATFORM,'GET',{}).then((res)=>{
         //获取授权平台
         console.log('=====>',res);
         this.platformList = res.data;
         this.form.totalPlat = res.data;
       })
+    },
+    //获取代理商列表
+    getAgentList(){
+      var req = {
+        keyword:this.nameInput,
+        platformId:this.platId,
+        startSearchTime:this.startSearchTime,
+        endSearchTime:this.endSearchTime,
+        page:this.listPage,
+        limit:20
+      }
+      console.log(req)
+      httpRquest(this.URL.AGENT_LIST,'GET',req).then((res)=>{
+        console.log(res);
+        this.list = res.data.records;
+        this.listLoading = false;
+        // this.listPage = this.listPage + 1;
+        this.totalNum = res.data.total
+      })
+    },
+    //上一页
+    onClickPre(){
+      this.listPage = this.listPage - 1;
+      this.getAgentList();
+    },
+    //下一页
+    onClickNext(){
+      this.listPage = this.listPage + 1;
+      this.getAgentList();
+    },
+    //选择页面
+    handleCurrentPage(){
+      this.listPage = this.currentPage;
+      this.getAgentList();
+    },
+    //搜索
+    onSearch(){
+      this.startSearchTime = this.value1[0];
+      this.endSearchTime = this.value1[1];
+      this.listPage = 1;
+      this.getAgentList();
     },
     //新增代理商
     onClickAdd(){
@@ -218,8 +254,7 @@ export default {
       httpRquest(this.URL.AGENT_RECORD,'GET',req).then((res)=>{
         console.log(res);
         if(res.code == 0){
-          this.record = res.data;
-          this.dialogRechargeVisible = false;
+          this.record = res.data.records;
         }
       })
     },
@@ -321,6 +356,9 @@ export default {
       width: 150px;
     }
     span{
+      margin-left: 20px;
+    }
+    .ctx_icon{
       margin-left: 20px;
     }
     // span:nth-child(1){

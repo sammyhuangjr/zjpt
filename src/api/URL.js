@@ -1,9 +1,10 @@
 import request from '@/utils/request'
 
 export function httpRquest(url,method,params){
-    return request({
-        url: url,
-        method: method,
-        data: params
-    })
+    let req = {
+        url:url,
+        method:method
+    }
+    req[method == 'GET' ? 'params' : 'data'] = params
+    return request(req);
 }

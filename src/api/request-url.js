@@ -12,6 +12,7 @@ var api = {
     DELETE:'/platform/delete',//平台删除
     AGENT_RECHARGE:'/agent/recharge/add',//代理商充值
     AGENT_RECORD:'/agent/recharge/page', //代理商充值记录
+    UPLOAD:'/platform/upload',//上传
 }
 
 import axios from 'axios'

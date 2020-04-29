@@ -16,6 +16,15 @@
             <el-form-item class="di_input" label="平台名称：" :label-width="formLabelWidth">
                 <el-input v-model="form.name" placeholder="请输入平台名称"></el-input>
             </el-form-item>
+            <el-form-item class="di_input uploadItem" label="对接软件：" :label-width="formLabelWidth">
+                <el-input v-model="form.downloadUrl" placeholder="请上传对接该平台的交互软件" :disabled="true"></el-input>
+                <el-upload class="upload-demo" :action="uploadUrl"  :multiple="false" :limit="1" :file-list="fileList" :on-success="uploadSuccess">
+                  <el-button size="small" type="primary">点击上传</el-button>
+                </el-upload>
+            </el-form-item>
+            <el-form-item class="di_input" label="版本号：" :label-width="formLabelWidth">
+                <el-input v-model="form.vcode" placeholder="请输入上传对接软件的版本号"></el-input>
+            </el-form-item>
             <el-form-item class="di_input" label="备注：" :label-width="formLabelWidth">
                 <el-input type="textarea" v-model="form.remarks"></el-input>
             </el-form-item>
@@ -28,12 +37,12 @@
     <el-table class="ctx_t" v-if="list" v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row >
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column align="center" label="平台名称" width="250">
+      <el-table-column align="center" label="平台名称" show-overflow-tooltip>
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="接入时间" width="200">
+      <el-table-column align="center" label="接入时间" show-overflow-tooltip>
         <template slot-scope="scope">
           {{ scope.row.createTime }}
         </template>
@@ -43,7 +52,22 @@
           {{ scope.row.remarks }}
         </template>
       </el-table-column>
-      <el-table-column align="center" label="操作" width="300">
+      <el-table-column align="center" label="软件版本" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.createTime }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="发布时间" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.createTime }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="下载" show-overflow-tooltip>
+        <template slot-scope="scope">
+          {{ scope.row.createTime }}
+        </template>
+      </el-table-column>
+      <el-table-column align="center" label="操作" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small">编辑</el-button>
           <el-button @click="deleteClick(scope.row,scope.$index)" type="text" size="small">删除</el-button>
@@ -82,12 +106,17 @@ export default {
       isEdit:false,
       editId:'',//编辑id
       editIndex:0,//编辑index
+      fileList:[{name:'',url:''}],
       dialogFormVisible: false,
+      uploadUrl:process.env.VUE_APP_BASE_API + this.URL.UPLOAD,//上传地址
       form: {
           name: '',
           remarks:'',
+          downloadUrl:'',
+          vcode:'',
         },
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      updateLabelWidth: '80px'
     }
   },
   created() {
@@ -107,6 +136,9 @@ export default {
         this.listLoading = false;
       })
 
+    },
+    uploadSuccess(file, fileList){
+      console.log(file,fileList);
     },
     //删除
     deleteClick(e,index){
@@ -196,18 +228,26 @@ export default {
   .ctx_btn{
     float: right;
     margin-bottom: 20px;
+    margin-right: 20px;
   }
   .ctx_t{
     margin-left: 20px;
     margin-top: 10px;
     width: 100%;
+    margin-right: 20px;
   }
   .ctx_foot{
     text-align: center;
     margin-top: 10px;
   }
   .di_input{
-      width: 500px;
+    width: 400px;
   }
+  .uploadInput{
+    width: 350px;;
+  }
+  // .uploadItem .el-form-item__content{
+  //   display: flex !important;
+  // }
 </style>
 
