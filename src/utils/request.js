@@ -21,6 +21,7 @@ service.interceptors.request.use(
       config.headers['X-Token'] = getToken();
     }
     // config.params = JSON.stringify(config.params)
+    console.log(5555)
     return config
   },
   error => {
@@ -44,7 +45,10 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-
+    console.log(res)
+    if(res.code == 400){
+      this.$router.push({ path: '/login' })
+    }
     // // if the custom code is not 20000, it is judged as an error.
     // if (res.code !== 20000) {
     //   Message({
@@ -66,11 +70,8 @@ service.interceptors.response.use(
     //       })
     //     })
     //   }
-    //   console.log('<<<<<<<<<<<<<<<',res)
     //   return Promise.reject(new Error(res.message || 'Error'))
-    // } else {
-    //   return res
-    // }
+    // } 
     return res;
   },
   error => {

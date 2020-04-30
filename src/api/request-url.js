@@ -2,6 +2,7 @@
 	接口
 */
 var api = {
+    LOGIN:'/login',//登录
     ADD: '/platform/add', // 新增平台
     AGENT_LIST:'/agent/page',//代理商列表
     AGENT_ADD:'/agent/add',//新增代理商
@@ -13,6 +14,10 @@ var api = {
     AGENT_RECHARGE:'/agent/recharge/add',//代理商充值
     AGENT_RECORD:'/agent/recharge/page', //代理商充值记录
     UPLOAD:'/platform/upload',//上传
+    DEVICE_ADD:'/device/authRecord/add',//新增设备授权
+    CHECK_SN:'/device/authRecord/isAuthBySn',//校验设备sn
+    DEVICE_LIST:'/device/authRecord/page',//设备授权管理列表
+    DEVICE_DELETE:'/device/authRecord/delete',//设备授权管理删除
 }
 
 import axios from 'axios'

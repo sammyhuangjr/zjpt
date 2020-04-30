@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <div class="ctx_header">
-        <span>平台名称：</span><el-input v-model="input" placeholder="请输入" class="h_input" type="text"></el-input>
+        <span>平台名称：</span><el-input v-model="platformInput" placeholder="请输入" class="h_input" type="text"></el-input>
         <div class="ctx_icon">
-          <el-button type="primary" icon="el-icon-refresh-right" circle></el-button>
-          <el-button type="primary" icon="el-icon-search" circle></el-button>
+          <el-button type="primary" icon="el-icon-refresh-right" circle @click="onReset"></el-button>
+          <el-button type="primary" icon="el-icon-search" circle @click="onSearch"></el-button>
         </div>
     </div>
     <div class="ctx_btn">
@@ -17,7 +17,7 @@
                 <el-input v-model="form.name" placeholder="请输入平台名称"></el-input>
             </el-form-item>
             <el-form-item class="di_input uploadItem" label="对接软件：" :label-width="formLabelWidth">
-                <el-input v-model="form.downloadUrl" placeholder="请上传对接该平台的交互软件" :disabled="true"></el-input>
+                <!-- <el-input v-model="form.downloadUrl" placeholder="请上传对接该平台的交互软件" :disabled="true"></el-input> -->
                 <el-upload class="upload-demo" :action="uploadUrl"  :multiple="false" :limit="1" :file-list="fileList" :on-success="uploadSuccess">
                   <el-button size="small" type="primary">点击上传</el-button>
                 </el-upload>
@@ -54,17 +54,17 @@
       </el-table-column>
       <el-table-column align="center" label="软件版本" show-overflow-tooltip>
         <template slot-scope="scope">
-          {{ scope.row.createTime }}
+          {{ scope.row.vcode }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="发布时间" show-overflow-tooltip>
         <template slot-scope="scope">
-          {{ scope.row.createTime }}
+          {{ scope.row.updateTime }}
         </template>
       </el-table-column>
       <el-table-column align="center" label="下载" show-overflow-tooltip>
         <template slot-scope="scope">
-          {{ scope.row.createTime }}
+          <el-link type="primary" :href="scope.row.downloadUrl" target="_blank">{{ scope.row.downloadUrl }}</el-link>
         </template>
       </el-table-column>
       <el-table-column align="center" label="操作" show-overflow-tooltip>
@@ -74,11 +74,8 @@
         </template>
       </el-table-column>
     </el-table>
-    <el-pagination class="ctx_foot"
-      :page-size="20"
-      :pager-count="5"
-      layout="prev, pager, next"
-      :total="1000">
+    <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="totalNum" @next-click="onClickNext" @prev-click="onClickPre" 
+    @current-change="handleCurrentPage" :current-page.sync="currentPage">
     </el-pagination>
   </div>
   
@@ -101,13 +98,16 @@ export default {
   data() {
     return {
       list: null, //平台列表
+      totalNum:0,
       listLoading: true,
-      input:'',
+      platformInput:'',
       isEdit:false,
       editId:'',//编辑id
       editIndex:0,//编辑index
       fileList:[{name:'',url:''}],
       dialogFormVisible: false,
+      listPage:1,//当前页数
+      currentPage:1,
       uploadUrl:process.env.VUE_APP_BASE_API + this.URL.UPLOAD,//上传地址
       form: {
           name: '',
@@ -124,21 +124,47 @@ export default {
   },
   methods:{
     fetchData() {
+      console.log(666666666)
       this.listLoading = true
       var req = {
-        page:1,
+        page:this.listPage,
         limit:20,
-        keyWord:'',
+        keyWord:this.platformInput,
       }
-      httpRquest(this.URL.PAGE,'GET',{}).then((res)=>{
+      httpRquest(this.URL.AGENT_RECORD,'GET',req).then((res)=>{
         console.log(res)
         this.list = res.data.records;
         this.listLoading = false;
       })
 
     },
+    //上一页
+    onClickPre(){
+      this.listPage = this.listPage - 1;
+      this.fetchData();
+    },
+    //下一页
+    onClickNext(){
+      this.listPage = this.listPage + 1;
+      this.fetchData();
+    },
+    //选择页面
+    handleCurrentPage(){
+      this.listPage = this.currentPage;
+      this.fetchData();
+    },
     uploadSuccess(file, fileList){
       console.log(file,fileList);
+      this.form.downloadUrl = file.data;
+    },
+    //搜索
+    onSearch(){
+      this.listPage = 1;
+      this.fetchData();
+    },
+    onReset(){
+      this.snInput = '';
+      this.platformInput = '';
     },
     //删除
     deleteClick(e,index){
@@ -160,7 +186,8 @@ export default {
     //新增
     onClickForm(){
       this.form = {};
-      this.dialogFormVisible = true
+      this.dialogFormVisible = true;
+      this.fileList = [];
     },
     //提交
     onClickSubmit(){
@@ -169,6 +196,8 @@ export default {
           name:this.form.name,
           remarks:this.form.remarks,
           id:this.editId,
+          vcode:this.form.vcode,
+          downloadUrl:this.form.downloadUrl
         } 
         httpRquest(this.URL.UPDATE,'post',req).then((res)=>{
           console.log(res)
@@ -185,6 +214,8 @@ export default {
         var req = {
           name:this.form.name,
           remarks:this.form.remarks,
+          vcode:this.form.vcode,
+          downloadUrl:this.form.downloadUrl
         } 
         httpRquest(this.URL.ADD,'post',req).then((res)=>{
           console.log('=>>',res)

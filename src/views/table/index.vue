@@ -46,14 +46,14 @@
     <el-table class="ctx_t" v-if="list" v-loading="listLoading" :data="list" element-loading-text="Loading" border fit highlight-current-row>
       <el-table-column type="selection" width="55">
       </el-table-column>
-      <el-table-column align="center" label="代理商名称" width="95">
+      <el-table-column align="center" label="代理商名称" width="200">
         <template slot-scope="scope">
           {{ scope.row.name }}
         </template>
       </el-table-column>
-      <el-table-column label="授权平台" >
+      <el-table-column label="授权平台" width="95" align="center">
         <template slot-scope="scope">
-          {{ scope.row.platformNum }}
+          {{ scope.row.platformNum }}个
         </template>
       </el-table-column>
       <el-table-column label="剩余授权额度" width="110" align="center">
@@ -61,23 +61,23 @@
           <span>{{ scope.row.surplusQuata }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="联系人" width="110" align="center">
+      <el-table-column label="联系人" width="130" align="center">
         <template slot-scope="scope">
           {{ scope.row.contact }}
         </template>
       </el-table-column>
-      <el-table-column class-name="status-col" label="联系手机号" width="110" align="center">
+      <el-table-column class-name="status-col" label="联系手机号" show-overflow-tooltip align="center">
         <template slot-scope="scope">
           {{ scope.row.contactPhone }}
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="created_at" label="创建时间" width="200">
+      <el-table-column align="center" prop="created_at" label="创建时间" show-overflow-tooltip>
         <template slot-scope="scope">
           <i class="el-icon-time" />
           <span>{{ scope.row.createTime }}</span>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="created_at" label="操作" width="200">
+      <el-table-column align="center" prop="created_at" label="操作" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small">编辑</el-button>
           <el-button type="text" @click="onClickRecord(scope.row)" size="small">充值记录</el-button>

@@ -55,7 +55,8 @@
             </template>
         </el-table-column>
     </el-table>
-    <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="1000"></el-pagination>
+    <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="totalNum" @next-click="onClickNext" @prev-click="onClickPre" 
+    @current-change="handleCurrentPage" :current-page.sync="currentPage"></el-pagination>
   </div>
   
 </template>
@@ -77,6 +78,7 @@ export default {
   data() {
     return {
       list: null,
+      totalNum:0,
       listLoading: true,
       input:'',
       value1:'',//最近登录时间
