@@ -2,6 +2,7 @@ import axios from 'axios'
 import { MessageBox, Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from '@/utils/auth'
+import router from '@/router/index'
 
 // create an axios instance
 const service = axios.create({
@@ -18,7 +19,8 @@ service.interceptors.request.use(
       // let each request carry token
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
-      config.headers['X-Token'] = getToken();
+      console.log(store.getters.token)
+      config.headers['token'] = store.getters.token;
     }
     // config.params = JSON.stringify(config.params)
     console.log(5555)
@@ -46,8 +48,13 @@ service.interceptors.response.use(
   response => {
     const res = response.data
     console.log(res)
-    if(res.code == 400){
-      this.$router.push({ path: '/login' })
+    if(res.code == 605){
+      Message({
+        message: res.msg || 'Error',
+        type: 'error',
+        duration: 5 * 1000
+      })
+      // router.push({ path: '/login' })
     }
     // // if the custom code is not 20000, it is judged as an error.
     // if (res.code !== 20000) {

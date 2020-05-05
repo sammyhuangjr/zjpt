@@ -54,6 +54,7 @@
 
 <script>
 import { validUsername } from '@/utils/validate'
+import { httpRquest } from '@/api/URL'
 
 export default {
   name: 'Login',
@@ -107,7 +108,18 @@ export default {
     },
     handleLogin() {
       this.loading = true
-      this.$router.push({ path: '/' })
+      // this.$router.push({ path: '/' })
+      let req = {
+        username:this.loginForm.username,
+        password:this.loginForm.password,
+        code:1
+      }
+      httpRquest(this.URL.LOGIN,'GET',req).then((res)=>{
+        console.log('=====>',res);
+        this.loading = false
+        this.$store.dispatch('user/login',res.data.token);
+        this.$router.push({ path: this.redirect || '/' });
+      })
       // this.$refs.loginForm.validate(valid => {
       //   if (valid) {
       //     this.loading = true

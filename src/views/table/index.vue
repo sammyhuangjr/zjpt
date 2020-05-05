@@ -192,12 +192,12 @@ export default {
     fetchData() {
       this.listLoading = true
       this.getAgentList();
-      httpRquest(this.URL.PLATFORM,'GET',{}).then((res)=>{
-        //获取授权平台
-        console.log('=====>',res);
-        this.platformList = res.data;
-        this.form.totalPlat = res.data;
-      })
+      // httpRquest(this.URL.PLATFORM,'GET',{}).then((res)=>{
+      //   //获取授权平台
+      //   console.log('=====>',res);
+      //   this.platformList = res.data;
+      //   this.form.totalPlat = res.data;
+      // })
     },
     //获取代理商列表
     getAgentList(){
