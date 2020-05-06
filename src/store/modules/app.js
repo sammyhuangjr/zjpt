@@ -5,7 +5,8 @@ const state = {
     opened: Cookies.get('sidebarStatus') ? !!+Cookies.get('sidebarStatus') : true,
     withoutAnimation: false
   },
-  device: 'desktop'
+  device: 'desktop',
+  routers:JSON.parse(localStorage.getItem('routers')),
 }
 
 const mutations = {
@@ -25,6 +26,11 @@ const mutations = {
   },
   TOGGLE_DEVICE: (state, device) => {
     state.device = device
+  },
+  SET_ROUTERS:(state,routers) =>{
+    console.log('========>',routers)
+    state.routers = routers;
+    localStorage.setItem('routers',JSON.stringify(routers));
   }
 }
 
@@ -37,6 +43,9 @@ const actions = {
   },
   toggleDevice({ commit }, device) {
     commit('TOGGLE_DEVICE', device)
+  },
+  setRouters({commit},routers){
+    commit('SET_ROUTERS', routers)
   }
 }
 

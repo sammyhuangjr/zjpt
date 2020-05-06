@@ -31,13 +31,8 @@ export default {
       'sidebar'
     ]),
     routes() {
-      console.log(this.$router)
-      // this.$router.options.routes[6].children.push({
-      //   meta: {title: "用户管理2"},
-      //   name: "user",
-      //   path: "user?index=3",
-      // })
-      return this.$router.options.routes
+      return this.$store.state.app.routers 
+      // return this.$router.options.routes
     },
     activeMenu() {
       const route = this.$route

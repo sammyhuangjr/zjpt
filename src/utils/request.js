@@ -6,6 +6,7 @@ import router from '@/router/index'
 
 // create an axios instance
 const service = axios.create({
+  ContentType: "application/x-www-form-urlencoded",
   baseURL: process.env.VUE_APP_BASE_API, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
   timeout: 5000 // request timeout
@@ -23,7 +24,6 @@ service.interceptors.request.use(
       config.headers['token'] = store.getters.token;
     }
     // config.params = JSON.stringify(config.params)
-    console.log(5555)
     return config
   },
   error => {
@@ -47,7 +47,6 @@ service.interceptors.response.use(
    */
   response => {
     const res = response.data
-    console.log(res)
     if(res.code == 605){
       Message({
         message: res.msg || 'Error',

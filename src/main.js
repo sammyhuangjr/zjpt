@@ -27,6 +27,7 @@ import '@/permission' // permission control
  */
 // import oldRequest from '@/utils/requestold.js'
 import URL from '@/api/request-url.js'
+import Axios from 'axios'
 
 if (process.env.NODE_ENV === 'production') {
   const { mockXHR } = require('../mock')
@@ -41,7 +42,7 @@ Vue.use(URL)
 // Vue.use(ElementUI)
 
 Vue.config.productionTip = false
-
+Axios.defaults.withCredentials = false;
 new Vue({
   el: '#app',
   router,

@@ -114,6 +114,7 @@ export default {
         password:this.loginForm.password,
         code:1
       }
+      // this.$router.push({ path: this.redirect || '/' });
       httpRquest(this.URL.LOGIN,'GET',req).then((res)=>{
         console.log('=====>',res);
         this.loading = false
