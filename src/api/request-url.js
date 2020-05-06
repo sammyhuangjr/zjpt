@@ -26,11 +26,11 @@ var api = {
 
 import axios from 'axios'
 axios.defaults.baseURL = process.env.VUE_APP_BASE_API
-// axios.interceptors.request.use((config) => {
-//     config.headers['Content-Type'] = 'application/json;charset=UTF-8';
-//     return config;
-// }
-// );
+axios.interceptors.request.use((config) => {
+    config.headers['Content-Type'] = 'multipart/form-data';
+    return config;
+}
+);
 
 export function getURL(){
     return api;
@@ -42,5 +42,7 @@ export default {
         Vue.prototype.newPost = function(url,params){
             return axios.post(url,params);
         }
+
+        Vue.prototype.axios = axios;
     }
 }

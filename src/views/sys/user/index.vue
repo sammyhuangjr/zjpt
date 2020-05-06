@@ -222,11 +222,29 @@ export default {
           phone:this.form.phone,
           remarks:this.form.remarks
         }
-        httpRquest(this.URL.USER_EDIT,'GET',req).then((res)=>{
-          console.log(res);
-          Vue.set(this.list,this.editIndex,res.data)
-          this.dialogFormVisible = false
+        // httpRquest(this.URL.USER_EDIT,'POST',req,'form').then((res)=>{
+        //   console.log(res);
+        //   Vue.set(this.list,this.editIndex,res.data)
+        //   this.dialogFormVisible = false
+        // })
+
+        var formdata = new FormData();// 创建form对象
+        formdata.append('id',this.editId);
+        formdata.append('agentId',this.form.agentId);
+        formdata.append('username',this.form.username);
+        formdata.append('password',this.form.password);
+        formdata.append('phone',this.form.phone);
+        formdata.append('remarks',this.form.remarks);
+        let config = {
+            headers:{
+              'Content-Type':'multipart/form-data',
+              'token':this.$store.getters.token
+            }
+        };  //添加请求头
+        this.axios.post(`${this.URL.USER_EDIT}`,formdata,config).then(response=>{ 
+            console.log('==============>',response)
         })
+
       }else{
         var req = {
           agentId:this.form.agentId,
@@ -268,7 +286,7 @@ export default {
       httpRquest(this.URL.AGENT_LIST,'GET',req).then((res)=>{
         console.log(res);
         this.form.agent = res.data.records;
-        this.agentList = res.data.agentList;
+        this.agentList = res.data.records;
         this.listLoading = false;
       })
     },
