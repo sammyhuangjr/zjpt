@@ -22,12 +22,19 @@ var api = {
     USER_LIST:'/sysUser/page',//获取用户列表
     USER_EDIT:'/sysUser/update',//用户编辑
     USER_ADD:'/sysUser/add',//新建用户
+    GET_ROLE:'/role/getAll',//获取角色
 }
 
 import axios from 'axios'
+import store from '@/store'
 axios.defaults.baseURL = process.env.VUE_APP_BASE_API
 axios.interceptors.request.use((config) => {
-    config.headers['Content-Type'] = 'multipart/form-data';
+    config.headers['Content-Type'] = 'application/json;charset=UTF-8';
+    config.headers['Access-Control-Allow-Origin'] = true;
+    if (store.getters.token) {
+        config.headers['token'] = store.getters.token;
+    }
+    
     return config;
 }
 );
@@ -41,6 +48,10 @@ export default {
         Vue.prototype.URL = api;
         Vue.prototype.newPost = function(url,params){
             return axios.post(url,params);
+        }
+
+        Vue.prototype.newGet = function(url){
+            return axios.get(url);
         }
 
         Vue.prototype.axios = axios;

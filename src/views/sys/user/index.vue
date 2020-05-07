@@ -77,7 +77,13 @@
                     <el-checkbox label="第三方公司"></el-checkbox>
                 </el-checkbox-group>
             </el-form-item> -->
-            
+            <el-form-item class="di_input" label="角色：" :label-width="formLabelWidth">
+                <el-checkbox-group v-model="roleList">
+                  <div v-for="(item,index) in platformList" :key="item.id">
+                    <el-checkbox :label="item.id" name="type" :checked="platformIsCheck(item)">{{item.name}}</el-checkbox>
+                  </div>
+                </el-checkbox-group>
+            </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -164,7 +170,8 @@ export default {
           agentId:'',
         },
       agentList:[],
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      roleList:[],//角色列表
     }
   },
   created() {
@@ -222,28 +229,28 @@ export default {
           phone:this.form.phone,
           remarks:this.form.remarks
         }
-        // httpRquest(this.URL.USER_EDIT,'POST',req,'form').then((res)=>{
-        //   console.log(res);
-        //   Vue.set(this.list,this.editIndex,res.data)
-        //   this.dialogFormVisible = false
-        // })
-
-        var formdata = new FormData();// 创建form对象
-        formdata.append('id',this.editId);
-        formdata.append('agentId',this.form.agentId);
-        formdata.append('username',this.form.username);
-        formdata.append('password',this.form.password);
-        formdata.append('phone',this.form.phone);
-        formdata.append('remarks',this.form.remarks);
-        let config = {
-            headers:{
-              'Content-Type':'multipart/form-data',
-              'token':this.$store.getters.token
-            }
-        };  //添加请求头
-        this.axios.post(`${this.URL.USER_EDIT}`,formdata,config).then(response=>{ 
-            console.log('==============>',response)
+        httpRquest(this.URL.USER_EDIT,'POST',req,'form').then((res)=>{
+          console.log(res);
+          Vue.set(this.list,this.editIndex,res.data)
+          this.dialogFormVisible = false
         })
+
+        // var formdata = new FormData();// 创建form对象
+        // formdata.append('id',this.editId);
+        // formdata.append('agentId',this.form.agentId);
+        // formdata.append('username',this.form.username);
+        // formdata.append('password',this.form.password);
+        // formdata.append('phone',this.form.phone);
+        // formdata.append('remarks',this.form.remarks);
+        // let config = {
+        //     headers:{
+        //       'Content-Type':'multipart/form-data',
+        //       'token':this.$store.getters.token
+        //     }
+        // };  //添加请求头
+        // this.axios.post(`${this.URL.USER_EDIT}`,formdata,config).then(response=>{ 
+        //     console.log('==============>',response)
+        // })
 
       }else{
         var req = {
@@ -253,7 +260,7 @@ export default {
           phone:this.form.phone,
           remarks:this.form.remarks
         }
-        httpRquest(this.URL.USER_ADD,'GET',req).then((res)=>{
+        httpRquest(this.URL.USER_ADD,'POST',req).then((res)=>{
           console.log(res);
           this.list.unshift(res.data);
           this.dialogFormVisible = false
@@ -271,7 +278,14 @@ export default {
     //打开新建用户
     onClickAdd(){
       this.dialogFormVisible = true;
-      this.isEdit = true;
+      this.isEdit = false;
+    },
+    getRole(){
+      //GET_ROLE
+      httpRquest(this.URL.GET_ROLE,'POST',req).then((res)=>{
+        console.log(res);
+        this.roleList = res.records;
+      })
     },
     //获取代理商列表(组织)
     getAgentList(){

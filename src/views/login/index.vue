@@ -55,6 +55,7 @@
 <script>
 import { validUsername } from '@/utils/validate'
 import { httpRquest } from '@/api/URL'
+import store from '@/store'
 
 export default {
   name: 'Login',
@@ -76,7 +77,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: '4df8a1775e5b47eded7b63454a4836dc'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
