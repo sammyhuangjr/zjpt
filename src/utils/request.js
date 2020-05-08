@@ -23,9 +23,7 @@ service.interceptors.request.use(
       // ['X-Token'] is a custom headers key
       // please modify it according to the actual situation
       config.headers['token'] = store.getters.token;
-      console.log('-----------<',store.getters.token)
     }
-    console.log(config)
     return config
   },
   error => {
@@ -84,7 +82,6 @@ service.interceptors.response.use(
     //           return "";
     //         }
     const res = response.data
-    console.log(response);
     // if (response.data.returnCode == 0) {
     //   if (response.data.bean) {
     //      let cookie  = response.headers.cookie;

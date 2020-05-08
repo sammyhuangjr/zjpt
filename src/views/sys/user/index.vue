@@ -25,7 +25,7 @@
     </div>
     <div class="ctx_btn">
       <el-button  icon="el-icon-refresh" circle></el-button>
-      <el-button type="danger" @click="dialogVisible = true" plain>批量删除</el-button>
+      <!-- <el-button type="danger" @click="dialogVisible = true" plain>批量删除</el-button> -->
       <el-button type="primary" @click="onClickAdd" plain>新建用户</el-button>
     </div>
     <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
@@ -68,22 +68,22 @@
                 </el-select>
             </el-form-item> -->
             <el-form-item class="di_input" label="备注：" :label-width="formLabelWidth">
-                <el-input type="textarea" v-model="form.desc"></el-input>
+                <el-input type="textarea" v-model="form.remarks"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="角色：" :label-width="formLabelWidth">
+                <el-radio-group v-model="form.roleId">
+                  <div v-for="(item,index) in roleList" :key="item.id" class="role">
+                    <el-radio :label="item.id">{{item.roleName}}</el-radio>
+                  </div>
+                </el-radio-group>
             </el-form-item>
             <!-- <el-form-item class="di_input" label="角色：" :label-width="formLabelWidth">
-                 <el-checkbox-group v-model="checkList">
-                    <el-checkbox label="济公网平台"></el-checkbox>
-                    <el-checkbox label="马丁洛克网络柯基"></el-checkbox>
-                    <el-checkbox label="第三方公司"></el-checkbox>
-                </el-checkbox-group>
-            </el-form-item> -->
-            <el-form-item class="di_input" label="角色：" :label-width="formLabelWidth">
-                <el-checkbox-group v-model="roleList">
-                  <div v-for="(item,index) in platformList" :key="item.id">
-                    <el-checkbox :label="item.id" name="type" :checked="platformIsCheck(item)">{{item.name}}</el-checkbox>
+                <el-checkbox-group v-model="form.roleList">
+                  <div v-for="(item,index) in roleList" :key="item.id">
+                    <el-checkbox :label="item.id" name="type" :checked="platformIsCheck(item)">{{item.roleName}}</el-checkbox>
                   </div>
                 </el-checkbox-group>
-            </el-form-item>
+            </el-form-item> -->
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -96,7 +96,7 @@
           <template slot-scope="scope">{{ scope.row.username }}</template>
         </el-table-column>
         <el-table-column prop="name" label="角色" width="120">
-          <template slot-scope="scope">{{ scope.row.role }}</template>
+          <template slot-scope="scope">{{ scope.row.roleName }}</template>
         </el-table-column>
         <el-table-column prop="address" label="组织" show-overflow-tooltip>
           <template slot-scope="scope">{{ scope.row.agentName }}</template>
@@ -127,12 +127,15 @@
             </template>
         </el-table-column>
     </el-table>
-    <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="1000"></el-pagination>
+    <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="totalNum" @next-click="onClickNext" @prev-click="onClickPre" 
+    @current-change="handleCurrentPage" :current-page.sync="currentPage">
+    </el-pagination>
   </div>
   
 </template>
 
 <script>
+import Vue from 'vue'
 import { getList } from '@/api/table'
 import { httpRquest } from '@/api/URL'
 export default {
@@ -148,11 +151,15 @@ export default {
   },
   data() {
     return {
+      totalNum:0,
+      currentPage:1,
+      listPage:1, //列表页数
       list: null,
       listLoading: true,
       isEdit:false,
       editId:'',//编辑id
       phone:'',//联系电话
+      editIndex:0,//编辑index
       lastTime:'',//最近登录时间
       dialogFormVisible: false,//添加角色
       dialogVisible: false,//批量删除
@@ -168,6 +175,7 @@ export default {
           remarks:'',
           agent:[],
           agentId:'',
+          roleId:'',
         },
       agentList:[],
       formLabelWidth: '120px',
@@ -177,6 +185,7 @@ export default {
   created() {
     this.fetchData();
     this.getAgentList(); //获取组织
+    this.getRole();//获取角色
   },
   methods: {
     fetchData() {
@@ -191,6 +200,7 @@ export default {
         console.log(res)
         this.listLoading = false;
         this.list = res.data.records;
+        this.totalNum = res.data.total
       })
     },
     handleClose(done) {
@@ -204,9 +214,35 @@ export default {
     handleSelectionChange(){
       //TODO
     },
+    //上一页
+    onClickPre(){
+      this.listPage = this.listPage - 1;
+      this.fetchData();
+    },
+    //下一页
+    onClickNext(){
+      this.listPage = this.listPage + 1;
+      this.fetchData();
+    },
+    //选择页面
+    handleCurrentPage(){
+      this.listPage = this.currentPage;
+      this.fetchData();
+    },
+    //勾选角色
+    platformIsCheck(e){
+      console.log(e.id)
+      let curid = e.id;
+      for(let i = 0;i<this.form.roleList.length;i++){
+        if(this.form.roleList[i].id == e.id){
+          return true;
+        }
+      }
+      return false;
+    },
     //新建用户提交
     onClickSubmit(){
-      if(this.form.username == '' || this.form.password == '' || this.form.agentId == '' || this.form.phone == ''){
+      if(this.form.username == '' || !this.form.password || this.form.agentId == '' || this.form.phone == '' || !this.form.roleId){
         this.$message({
           message: '请完善信息',
           type: 'error'
@@ -227,7 +263,8 @@ export default {
           username:this.form.username,
           password:this.form.password,
           phone:this.form.phone,
-          remarks:this.form.remarks
+          remarks:this.form.remarks,
+          roleId:this.form.roleId
         }
         httpRquest(this.URL.USER_EDIT,'POST',req,'form').then((res)=>{
           console.log(res);
@@ -258,7 +295,8 @@ export default {
           username:this.form.username,
           password:this.form.password,
           phone:this.form.phone,
-          remarks:this.form.remarks
+          remarks:this.form.remarks,
+          roleId:this.form.roleId
         }
         httpRquest(this.URL.USER_ADD,'POST',req).then((res)=>{
           console.log(res);
@@ -270,21 +308,35 @@ export default {
     },
     //打开编辑
     editClick(e,index){
+      this.isEdit = true;
       this.dialogFormVisible = true
       this.form = e;
-      this.editId = index;
-      this.isEdit = true;
+      this.editId = e.id;
+      this.editIndex = index;
+    },
+    //打开查看
+    handleClick(e){
+      this.dialogFormVisible = true
+      this.form = e;
     },
     //打开新建用户
     onClickAdd(){
-      this.dialogFormVisible = true;
       this.isEdit = false;
+      this.dialogFormVisible = true;
+      this.form = {};
     },
+    //获取角色(多选框)
     getRole(){
       //GET_ROLE
-      httpRquest(this.URL.GET_ROLE,'POST',req).then((res)=>{
-        console.log(res);
-        this.roleList = res.records;
+      httpRquest(this.URL.GET_ROLE,'GET',{}).then((res)=>{
+        console.log('=========>>>>>>>',res);
+        // this.form.roleList = res.data;
+        this.roleList = res.data;
+        // let temp = {
+        //   id:'2222222',
+        //   roleName:'666'
+        // }
+        // this.roleList.push(temp);
       })
     },
     //获取代理商列表(组织)
@@ -346,6 +398,9 @@ export default {
   }
   .di_input{
       width: 500px;
+      .role{
+        margin-top: 20px;
+      }
   }
  
 </style>

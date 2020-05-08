@@ -191,13 +191,13 @@ export default {
   methods: {
     fetchData() {
       this.listLoading = true
-      // this.getAgentList();
-      // this.newGet(this.URL.PLATFORM).then((res)=>{
-      //   //获取授权平台
-      //   console.log('=====>',res);
-      //   this.platformList = res.data;
-      //   this.form.totalPlat = res.data;
-      // })
+      this.getAgentList();
+      this.newGet(this.URL.PLATFORM).then((res)=>{
+        //获取授权平台
+        console.log('=====>',res);
+        this.platformList = res.data;
+        this.form.totalPlat = res.data;
+      })
       httpRquest(this.URL.PLATFORM,'GET',{}).then((res)=>{
         //获取授权平台
         console.log('=====>',res);

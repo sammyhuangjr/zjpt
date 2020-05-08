@@ -3,7 +3,7 @@
 */
 var api = {
     LOGIN:'/login',//登录
-    MENU:'/role/getMenus',//获取权限列表
+    MENU:'/sysMenu/getMenuTree',//获取菜单权限列表
     ADD: '/platform/add', // 新增平台
     AGENT_LIST:'/agent/page',//代理商列表
     AGENT_ADD:'/agent/add',//新增代理商
@@ -23,6 +23,12 @@ var api = {
     USER_EDIT:'/sysUser/update',//用户编辑
     USER_ADD:'/sysUser/add',//新建用户
     GET_ROLE:'/role/getAll',//获取角色
+    ROLE_ADD:'/role/add',//获取角色管理列表
+    ROLE_DELETE:'/role/delete',//角色删除
+    ROLE_UPDATE:'/role/update',//角色修改
+    AUTH:'/role/insertRoleMenus',//授权
+    AUTH_MENU:'/sysMenu/getMenuList',//授权菜单
+    MENU_ADD:'/sysMenu/add',//新增资源
 }
 
 import axios from 'axios'

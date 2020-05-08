@@ -23,7 +23,7 @@ export function mockXHR() {
       if (this.responseType) {
         this.custom.xhr.responseType = this.responseType
       }
-    }e
+    }
     this.proxy_send(...arguments)
   }
 
