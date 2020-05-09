@@ -29,6 +29,9 @@ var api = {
     AUTH:'/role/insertRoleMenus',//授权
     AUTH_MENU:'/sysMenu/getMenuList',//授权菜单
     MENU_ADD:'/sysMenu/add',//新增资源
+    GET_ROUTER:'/sysMenu/getUserMenu',//获取侧边栏
+    MENU_UPDATE:'/sysMenu/update',//修改菜单
+    MENU_DELETE:'/sysMenu/delete',//删除菜单
 }
 
 import axios from 'axios'

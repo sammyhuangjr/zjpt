@@ -6,7 +6,7 @@ const state = {
     withoutAnimation: false
   },
   device: 'desktop',
-  routers:JSON.parse(localStorage.getItem('routers')),
+  routers:(localStorage.getItem('routers') !== null && localStorage.getItem('routers') !== 'undefined') ? JSON.parse(localStorage.getItem('routers')) : false,
 }
 
 const mutations = {
@@ -31,6 +31,10 @@ const mutations = {
     console.log('========>',routers)
     state.routers = routers;
     localStorage.setItem('routers',JSON.stringify(routers));
+  },
+  CLEAR_ROUTERS:(state) =>{
+    state.routers = [];
+    localStorage.removeItem('routers');
   }
 }
 
@@ -46,6 +50,9 @@ const actions = {
   },
   setRouters({commit},routers){
     commit('SET_ROUTERS', routers)
+  },
+  clearRouters({commit}){
+    commit('CLEAR_ROUTERS');
   }
 }
 

@@ -20,6 +20,9 @@
             <el-form-item class="di_input" label="资源url" :label-width="formLabelWidth">
                 <el-input v-model="form.path"></el-input>
             </el-form-item>
+            <el-form-item class="di_input" label="组件url" :label-width="formLabelWidth">
+                <el-input v-model="form.component"></el-input>
+            </el-form-item>
             <!-- <el-form-item class="di_input" label="菜单图标" :label-width="formLabelWidth">
                  <el-input v-model="form.name"></el-input>
             </el-form-item>     -->
@@ -90,6 +93,7 @@ export default {
       value:'',
       options:[],
       isEdit:false,//是否编辑
+      editIndex:0,//编辑 添加子菜单index
       isAddChildren:false,//是否添加子菜单
       parentId:'',//父菜单id
       value1:'',//最近登录时间
@@ -103,6 +107,7 @@ export default {
           permission:'',//权限标识
           name:'',//资源名称
           path:'',//资源url
+          component:'',//组件url
         },
       formLabelWidth: '120px',
     }
@@ -130,37 +135,72 @@ export default {
     //提交资源
     onClickSubmit(){
       this.listLoading = true;
-      let req = {};
-      if(this.isAddChildren){
-        req = {
-          parentId:this.parentId,
+      let reqUrl = this.URL.MENU_ADD;
+      let message = '';
+      let reqType = 0;
+      let req = {
           name:this.form.name,
           permission:this.form.permission,
           path:this.form.path,
           type:this.form.type,
-        }
-      }else if(this.isEdit){
-
-      }else{
-        req = {
-          name:this.form.name,
-          permission:this.form.permission,
-          path:this.form.path,
-          type:this.form.type,
-        }
+          component:this.form.component
+        };
+      if(this.isAddChildren){ //添加子菜单
+        req['parentId'] = this.parentId;
+        reqUrl = this.URL.MENU_ADD;
+        message = '添加子菜单成功,请重新登录';
+      }else if(this.isEdit){  //编辑 
+        req['id'] = this.form.id
+        reqUrl = this.URL.MENU_UPDATE;
+        message = '编辑成功,请重新登录';
+        reqType = 1;
+      }else{ //新增菜单
+        reqUrl = this.URL.MENU_ADD;
+        message = '添加成功,请重新登录';
+        reqType = 2;
       }
-      httpRquest(this.URL.MENU_ADD,'POST',req).then((res)=>{
+      httpRquest(reqUrl,'POST',req).then((res)=>{
           this.listLoading = false;
           // this.list = res.data.records;
+          if(res.code == 0){
+            this.$message({
+              message:message,
+              type:'success'
+            })
+            switch(reqType){
+              case 0 :{
+               
+              }break;
+              case 1 :{
+
+              }break;
+              case 2 :{
+                this.list.unshift(res.data);
+              }break;
+            }
+          }
         })
         this.dialogFormVisible = false
     },
     addMenu(){
 
     },
+    //修改菜单
+    handleClick(e,index){
+      this.isAddChildren = false;
+      this.isEdit = true;
+      this.form = e;
+      this.editIndex = index;
+      this.form.id = e.id;
+      this.dialogFormVisible = true;
+    },
+    //打开添加子菜单
     onClickChildren(e,index){
+      this.form = {};
       this.isAddChildren = true;
+      this.isEdit = false;
       this.parentId = e.id;
+      this.editIndex = index;
       this.dialogFormVisible = true;
     },
     //上一页

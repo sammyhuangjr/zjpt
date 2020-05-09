@@ -31,7 +31,8 @@ export default {
       'sidebar'
     ]),
     routes() {
-      return this.$store.state.app.routers 
+      console.log(this.$router.options.routes.concat(this.$store.state.app.routers));
+      return this.$router.options.routes.concat(this.$store.state.app.routers)
       // return this.$router.options.routes
     },
     activeMenu() {

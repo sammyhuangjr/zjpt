@@ -1,6 +1,7 @@
 import router from './router'
 import store from './store'
 import { Message } from 'element-ui'
+import Vue from 'vue'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
@@ -72,30 +73,6 @@ const whiteList = ['/login'] // no redirect whitelist
 var getRouters;   //储存动态的路由
 
 var tempRouter = [
-    {
-        path: '/login',
-        component: 'login/index',
-        hidden: true
-    },
-
-    {
-        path: '/404',
-        component: '404',
-        hidden: true
-    },
-
-    {
-        path: '/',
-        component: 'Layout',
-        // redirect: '/dashboard',
-        children: [{
-        path: 'dashboard',
-        name: 'Dashboard',
-        component: 'dashboard/index',
-        meta: { title: '住建接入授权平台', icon: 'dashboard' }
-        }]
-    },
-
     {
         path: '/example',
         component: 'Layout',
@@ -175,29 +152,38 @@ var tempRouter = [
     { path: '*', redirect: '/404', hidden: true }
 ]
 
+
+
 router.beforeEach((to,from,next)=>{
+  if(to.path === '/login'){
+    getRouters = null;
+  }
   if(!getRouters){
     let routers = store.state.app.routers;
     //如果路由为空的话，先去拿缓存的路由加载
     if(routers && routers.length > 0){
       //如果缓存有，则不用请求路由
       // filterAsyncRouter(store.routers);
-      console.log('有，不用请求路由')
+      console.log('有，不用请求路由',routers)
       getRouters = routers
       routerGo(to, next);
     }else{
-      //请求路由数据TODO
-      console.log(22222222)
-      console.log(getURL().MENU)
-      httpRquest(getURL().MENU,'GET',{}).then((res)=>{
-        //获取权限列表
-        console.log('666666666',res);
-
-      })
-      getRouters = tempRouter;
-      //MENU
-      store.dispatch('app/setRouters',getRouters);
-      routerGo(to, next)//执行路由跳转方法
+      console.log('请求路由')
+      if(to.path === '/login'){
+        next();
+      }else{
+        httpRquest(getURL().GET_ROUTER,'GET',{}).then((res)=>{
+          //获取权限列表
+          console.log('666666666',res);
+          getRouters = res.data;
+          store.dispatch('app/setRouters',getRouters);
+          routerGo(to, next)//执行路由跳转方法
+        })
+      }
+      //temp
+      // getRouters = tempRouter;
+      // store.dispatch('app/setRouters',getRouters);
+      // routerGo(to, next)//执行路由跳转方法
     }
   }else{
     next();

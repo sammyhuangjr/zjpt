@@ -174,7 +174,7 @@ export default {
         this.listLoading = false;
       })
     },
-    //AUTH  
+    //授权 
     onSubAuth(){
       let temp = this.$refs.tree.getCheckedKeys().join(',');
       let menuIdList = this.$refs.tree.getCheckedNodes();
@@ -188,7 +188,12 @@ export default {
       console.log(req)
       httpRquest(this.URL.AUTH,'POST',req).then((res)=>{
         console.log(res.data)
-        
+        if(res.code == 0){
+          this.$message({
+            message: '授权成功',
+            type: 'success'
+          });
+        }
         this.listLoading = false;
         this.dialogAuthVisible = false;
       })
