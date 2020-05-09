@@ -57,7 +57,7 @@
             <template slot-scope="scope">
                 <el-button @click="onClickChildren(scope.row,scope.$index)" type="text" size="small">添加子菜单</el-button>
                 <el-button @click="handleClick(scope.row)" type="text" size="small">修改</el-button>
-                <el-button type="text" size="small">删除</el-button>
+                <el-button type="text" size="small" @click="onClickDelete(scope.row,scope.$index)">删除</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -182,7 +182,8 @@ export default {
         })
         this.dialogFormVisible = false
     },
-    addMenu(){
+    addMenu(e,index){
+      // console.log(e,index)
 
     },
     //修改菜单
@@ -193,6 +194,10 @@ export default {
       this.editIndex = index;
       this.form.id = e.id;
       this.dialogFormVisible = true;
+    },
+    //删除菜单
+    onClickDelete(e,index){
+
     },
     //打开添加子菜单
     onClickChildren(e,index){
