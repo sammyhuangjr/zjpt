@@ -109,7 +109,7 @@ export default {
     },
     handleLogin() {
       this.loading = true
-      // this.$router.push({ path: '/' })
+      // this.$router.push({ path: '/dashboard' })
       let req = {
         username:this.loginForm.username,
         password:this.loginForm.password,
@@ -122,20 +122,6 @@ export default {
         this.$store.dispatch('user/login',res.data.token);
         this.$router.push({ path: this.redirect || '/' });
       })
-      // this.$refs.loginForm.validate(valid => {
-      //   if (valid) {
-      //     this.loading = true
-      //     this.$store.dispatch('user/login', this.loginForm).then(() => {
-      //       this.$router.push({ path: this.redirect || '/' })
-      //       this.loading = false
-      //     }).catch(() => {
-      //       this.loading = false
-      //     })
-      //   } else {
-      //     console.log('error submit!!')
-      //     return false
-      //   }
-      // })
     }
   }
 }

@@ -72,122 +72,163 @@ const whiteList = ['/login'] // no redirect whitelist
 //获取动态路由
 var getRouters;   //储存动态的路由
 
-var tempRouter = [
-    {
-        path: '/example',
-        component: 'Layout',
-        children: [
-        {
-            path: 'table',
-            name: 'Table',
-            component: 'table/index',
-            meta: { title: '代理商授权管理', icon: 'table' }
-        }
-        ]
-    },
-
-    {
-        path: '/form',
-        component: 'Layout',
-        children: [
-        {
-            path: 'index',
-            name: 'Form',
-            component: 'form/index',
-            meta: { title: '支持平台列表', icon: 'form' }
-        }
-        ]
-    },
-
-    {
-        path: '/nested',
-        component: 'Layout',
-        redirect: '/nested/menu1',
-        name: 'Nested',
-        meta: {
-        title: '设备授权管理',
-        icon: 'nested'
-        },
-        children: [
-        {
-            path: 'menu1',
-            component: 'nested/index', // Parent router-view
-            name: 'Menu1',
-            meta: { title: '设备授权管理' },
-        }
-        ]
-    },
-
-    {
-        path: '/sys',
-        component: 'Layout',
-        redirect: '/sys/user',
-        name: '系统管理',
-        meta: {
-        title: '系统管理',
-        icon: 'systemSet'
-        },
-        children: [
-        {
-            path: 'user',
-            component: 'sys/user/index', 
-            name: 'user',
-            meta: { title: '用户管理' },
-        },
-        {
-            path: 'role',
-            component: 'sys/role/index', 
-            name: 'role',
-            meta: { title: '角色管理' },
-        },
-        {
-            path: 'menu',
-            component: 'sys/menu/index', 
-            name: 'menu',
-            meta: { title: '菜单管理' },
-        }
-        ]
-    },
-
-    { path: '*', redirect: '/404', hidden: true }
-]
-
-
+var tempRouter = [{
+	"id": "0bbcb2f86911fb57f879402d5d15ef67",
+	"parentId": "0",
+	"children": [{
+		"id": "18e8ca67d946fbdf0bcf5bec88d84e0f",
+		"parentId": "0bbcb2f86911fb57f879402d5d15ef67",
+		"children": [],
+		"icon": null,
+		"name": "用户管理",
+		"url": null,
+		"spread": false,
+		"path": "/user",
+		"component": "sys/user/index",
+		"authority": null,
+		"redirect": null,
+		"code": null,
+		"type": "0",
+		"label": "用户管理",
+		"sort": 1,
+		"permission": null,
+		"createTime": null,
+		"updateTime": null
+	}, {
+		"id": "6dd0a11d57b2e1c1b69889e2003383c2",
+		"parentId": "0bbcb2f86911fb57f879402d5d15ef67",
+		"children": [],
+		"icon": null,
+		"name": "角色管理",
+		"url": null,
+		"spread": false,
+		"path": "role",
+		"component": "sys/role/index",
+		"authority": null,
+		"redirect": null,
+		"code": null,
+		"type": "0",
+		"label": "角色管理",
+		"sort": 1,
+		"permission": null,
+		"createTime": null,
+		"updateTime": null
+	}, {
+		"id": "9d236d90326b4587451ed6505aa84ac3",
+		"parentId": "0bbcb2f86911fb57f879402d5d15ef67",
+		"children": [],
+		"icon": null,
+		"name": "菜单管理",
+		"url": null,
+		"spread": false,
+		"path": "menu",
+		"component": "sys/menu/index",
+		"authority": null,
+		"redirect": null,
+		"code": null,
+		"type": "0",
+		"label": "菜单管理",
+		"sort": 1,
+		"permission": null,
+		"createTime": null,
+		"updateTime": null
+	}],
+	"icon": null,
+	"name": "系统管理",
+	"url": null,
+	"spread": false,
+	"path": "/sys",
+	"component": "Layout",
+	"authority": null,
+	"redirect": null,
+	"code": null,
+	"type": "0",
+	"label": "系统管理",
+	"sort": 1,
+	"permission": null,
+	"createTime": null,
+	"updateTime": null
+},{
+	"name": "平台列表2",
+	"url": null,
+	"spread": false,
+	"path": "/form",
+	"component": "Layout",
+	"authority": null,
+	"children":[{
+		"icon": null,
+		"name": "平台列表",
+		"url": null,
+		"spread": false,
+		"path": "index",
+		"component": "form/index"
+	}]
+}]
 
 router.beforeEach((to,from,next)=>{
-  if(to.path === '/login'){
-    getRouters = null;
-  }
-  if(!getRouters){
-    let routers = store.state.app.routers;
-    //如果路由为空的话，先去拿缓存的路由加载
-    if(routers && routers.length > 0){
-      //如果缓存有，则不用请求路由
-      // filterAsyncRouter(store.routers);
-      console.log('有，不用请求路由',routers)
-      getRouters = routers
-      routerGo(to, next);
-    }else{
-      console.log('请求路由')
-      if(to.path === '/login'){
-        next();
-      }else{
-        httpRquest(getURL().GET_ROUTER,'GET',{}).then((res)=>{
-          //获取权限列表
-          console.log('666666666',res);
-          getRouters = res.data;
-          store.dispatch('app/setRouters',getRouters);
-          routerGo(to, next)//执行路由跳转方法
-        })
-      }
-      //temp
-      // getRouters = tempRouter;
-      // store.dispatch('app/setRouters',getRouters);
-      // routerGo(to, next)//执行路由跳转方法
-    }
-  }else{
-    next();
-  }
+	console.log(to.path,from.path)
+	//如果从首页跳转404
+	if(to.path === '/404' && from.path === '/'){
+		let lastRouter = localStorage.getItem('lastRouter');
+		//1.有缓存页面，表示页面刷新
+		if(lastRouter){
+			//如果有缓存路由表
+			let routers = store.state.app.routers;
+			if(routers && routers.length > 0){
+				getRouters = filterAsyncRouter(routers) //过滤路由
+				router.addRoutes(getRouters) //动态添加路由
+				next({
+					path:lastRouter
+				})
+				localStorage.removeItem('lastRouter')
+				return;
+			}else{
+				//否则直接跳首页
+				next({path:'/'})
+				return;
+			}
+		}else{
+			//否则直接跳首页
+			next({path:'/'})
+			return;
+		}
+		getRouters = filterAsyncRouter(store.state.app.routers) //过滤路由
+		router.addRoutes(getRouters) //动态添加路由
+		next({
+			path:'/form/index'
+		})
+		return;
+	}
+	if(to.path === '/login'){
+		getRouters = null;
+	}
+	if(!getRouters && to.path !== '/login'){
+		let routers = store.state.app.routers;
+		//如果路由为空的话，先去拿缓存的路由加载
+		if(routers && routers.length > 0){
+		  //如果缓存有，则不用请求路由
+		  // filterAsyncRouter(store.routers);
+		  console.log('有，不用请求路由',routers)
+		  getRouters = routers
+		  routerGo(to, next);
+		}else{
+		  console.log('请求路由')
+			// httpRquest(getURL().GET_ROUTER,'GET',{}).then((res)=>{
+			//   获取权限列表
+			//   console.log('666666666',res);
+			//   getRouters = res.data;
+			//   store.dispatch('app/setRouters',getRouters);
+			//   routerGo(to, next)//执行路由跳转方法
+			// })
+			
+			//temp
+			getRouters = tempRouter;
+			store.dispatch('app/setRouters',getRouters);
+			routerGo(to, next)//执行路由跳转方法
+		  }
+	}else{
+		next();
+	}
 })
 
 //解析数据，添加路由
@@ -211,5 +252,5 @@ function filterAsyncRouter(asyncRouterMap){
 function routerGo(to, next) {
   getRouters = filterAsyncRouter(getRouters) //过滤路由
   router.addRoutes(getRouters) //动态添加路由
-  next({ ...to, replace: true })
+  next({to,replace:true})
 }
