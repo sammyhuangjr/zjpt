@@ -24,9 +24,9 @@ export const constantRoutes = [
     // redirect: '/dashboard',
     children: [{
       path: 'dashboard',
-      name: 'Dashboard',
+      name: '智建云授权系统',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '住建接入授权平台', icon: 'dashboard' }
+      meta: { title: '智建云授权系统', icon: 'dashboard' }
     }]
   },
 

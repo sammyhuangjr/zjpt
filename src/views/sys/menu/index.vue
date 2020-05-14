@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="ctx_btn">
-      <el-button type="primary" @click="dialogFormVisible = true" plain>添加资源</el-button>
+      <el-button type="primary" @click="onSubAdd" plain>添加资源</el-button>
     </div>
     <el-dialog title="新建菜单" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
@@ -22,6 +22,9 @@
             </el-form-item>
             <el-form-item class="di_input" label="组件url" :label-width="formLabelWidth">
                 <el-input v-model="form.component"></el-input>
+            </el-form-item>
+            <el-form-item class="di_input" label="排序" :label-width="formLabelWidth">
+                <el-input v-model="form.sort"></el-input>
             </el-form-item>
             <!-- <el-form-item class="di_input" label="菜单图标" :label-width="formLabelWidth">
                  <el-input v-model="form.name"></el-input>
@@ -108,6 +111,7 @@ export default {
           name:'',//资源名称
           path:'',//资源url
           component:'',//组件url
+          sort:1,//排序
         },
       formLabelWidth: '120px',
     }
@@ -132,6 +136,18 @@ export default {
           })
           .catch(_ => {});
     },
+    //dialogFormVisible = true
+    onSubAdd(){
+      this.dialogFormVisible = true;
+      this.form = {
+          type: '',
+          permission:'',
+          name:'',//资源名称
+          path:'',//资源url
+          component:'',//组件url
+          sort:1
+        };
+    },
     //提交资源
     onClickSubmit(){
       this.listLoading = true;
@@ -143,7 +159,8 @@ export default {
           permission:this.form.permission,
           path:this.form.path,
           type:this.form.type,
-          component:this.form.component
+          component:this.form.component,
+          sort:this.form.sort,
         };
       if(this.isAddChildren){ //添加子菜单
         req['parentId'] = this.parentId;
@@ -197,7 +214,19 @@ export default {
     },
     //删除菜单
     onClickDelete(e,index){
-
+      //MENU_DELETE
+      let req = {
+        id:e.id,
+      }
+       httpRquest(this.URL.MENU_DELETE,'GET',req).then((res)=>{
+        console.log(res.data)
+        if(res.code == 0){
+          this.$message({
+            message: '删除成功',
+            type: 'success'
+          });
+        }
+      })
     },
     //打开添加子菜单
     onClickChildren(e,index){

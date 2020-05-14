@@ -1,6 +1,6 @@
 import router from './router'
 import store from './store'
-import { Message } from 'element-ui'
+import { Message, TabPane } from 'element-ui'
 import Vue from 'vue'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css' // progress bar style
@@ -167,7 +167,7 @@ var tempRouter = [{
 
 router.beforeEach((to,from,next)=>{
 	console.log(to.path,from.path)
-	//如果从首页跳转404
+	//如果从首页跳转404(处理F5刷新的问题)
 	if(to.path === '/404' && from.path === '/'){
 		let lastRouter = localStorage.getItem('lastRouter');
 		//1.有缓存页面，表示页面刷新
@@ -192,16 +192,18 @@ router.beforeEach((to,from,next)=>{
 			next({path:'/'})
 			return;
 		}
-		getRouters = filterAsyncRouter(store.state.app.routers) //过滤路由
-		router.addRoutes(getRouters) //动态添加路由
-		next({
-			path:'/form/index'
-		})
-		return;
+		// getRouters = filterAsyncRouter(store.state.app.routers) //过滤路由
+		// router.addRoutes(getRouters) //动态添加路由
+		// next({
+		// 	path:'/form/index'
+		// })
+		// return;
 	}
+	//如果前往login页，重置路由信息
 	if(to.path === '/login'){
 		getRouters = null;
 	}
+	//如果路由信息为空，且不是去往login页，则需请求路由信息
 	if(!getRouters && to.path !== '/login'){
 		let routers = store.state.app.routers;
 		//如果路由为空的话，先去拿缓存的路由加载
@@ -212,19 +214,25 @@ router.beforeEach((to,from,next)=>{
 		  getRouters = routers
 		  routerGo(to, next);
 		}else{
-		  console.log('请求路由')
-			// httpRquest(getURL().GET_ROUTER,'GET',{}).then((res)=>{
-			//   获取权限列表
-			//   console.log('666666666',res);
-			//   getRouters = res.data;
-			//   store.dispatch('app/setRouters',getRouters);
-			//   routerGo(to, next)//执行路由跳转方法
-			// })
-			
+			//如果缓存没有路由信息,先前往登录页
+			// if(!getToken()){
+			// 	//未登录
+			// 	console.log('未登录')
+			// 	next({path:'/login'});
+			// 	return;
+			// }
+		  	console.log('请求路由')
+			httpRquest(getURL().GET_ROUTER,'GET',{}).then((res)=>{
+			//获取权限列表
+			  console.log('666666666',res);
+			  getRouters = res.data;
+			  store.dispatch('app/setRouters',getRouters);
+			  routerGo(to, next)//执行路由跳转方法
+			})
 			//temp
-			getRouters = tempRouter;
-			store.dispatch('app/setRouters',getRouters);
-			routerGo(to, next)//执行路由跳转方法
+			// getRouters = tempRouter;
+			// store.dispatch('app/setRouters',getRouters);
+			// routerGo(to, next)//执行路由跳转方法
 		  }
 	}else{
 		next();
@@ -241,9 +249,11 @@ function filterAsyncRouter(asyncRouterMap){
         router.component = _import(router.component);
       }
     }
-    if (router.children && router.children.length) {
+    if (router.children && router.children.length > 0) {
       router.children = filterAsyncRouter(router.children)
-    }
+    }else{
+		delete router.children
+	}
     return true;
   })
   return accessedRouters

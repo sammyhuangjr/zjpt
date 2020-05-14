@@ -2,17 +2,17 @@
   <div class="app-container">
     <div class="ctx_header">
         <span class="_sp">用户角色：</span>
-        <el-select v-model="roleName" placeholder="全部" class="h_arg">
+        <el-select v-model="roleIdSear" placeholder="全部" class="h_arg">
             <el-option v-for="item in list" :key="item.id" :label="item.roleName" :value="item.id" >
             </el-option>
         </el-select>
         <div class="block">
             <span class="_sp">更新时间：</span>
-            <el-date-picker v-model="value1" type="date" placeholder="选择日期" class="h_arg"></el-date-picker>
+            <el-date-picker v-model="updateTime" type="date" placeholder="选择日期" class="h_arg"></el-date-picker>
         </div>
         <div class="ctx_icon">
-          <el-button type="primary" icon="el-icon-refresh-right" circle></el-button>
-          <el-button type="primary" icon="el-icon-search" circle></el-button>
+          <el-button type="primary" icon="el-icon-search" circle @click="fetchData"></el-button>
+          <el-button type="primary" icon="el-icon-refresh-right" circle @click="reset"></el-button>
         </div>
     </div>
     <div class="ctx_header">
@@ -21,7 +21,7 @@
     </div>
     <div class="ctx_btn">
       <!-- <el-button type="danger" @click="dialogVisible = true" plain>批量删除</el-button> -->
-      <el-button type="primary" @click="onOpenAdd" plain>新建用户</el-button>
+      <el-button type="primary" @click="onOpenAdd" plain>新建角色</el-button>
     </div>
     <el-dialog title="提示" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
         <span>删除后,则该用户不可登录管理平台!</span>
@@ -32,11 +32,11 @@
     </el-dialog>
     <el-dialog title="新增角色" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
-            <el-form-item class="di_input" label="角色名称：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="角色名称：" :label-width="formLabelWidth" required>
                 <el-input v-model="form.roleName"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="角色编码：" :label-width="formLabelWidth">
-                <el-input v-model="form.roleCode"></el-input>
+            <el-form-item class="di_input" label="角色编码：" :label-width="formLabelWidth" required>
+                <el-input v-model="form.roleCode" :disabled="isEdit ? true : false"></el-input>
             </el-form-item>
             <el-form-item class="di_input" label="角色说明：" :label-width="formLabelWidth">
                 <el-input v-model="form.roleDesc"></el-input>
@@ -74,7 +74,7 @@
         </el-table-column>
     </el-table>
     <el-dialog title="授权" :visible.sync="dialogAuthVisible" width="600px" :before-close="handleClose">
-        <el-tree :data="menuList" node-key="id" ref="tree" show-checkbox @check-change="handleCheckChange" :default-checked-keys="checkedMenu">
+        <el-tree :data="menuList" node-key="id" ref="tree" check-strictly show-checkbox @check-change="handleCheckChange" :default-checked-keys="checkedMenu">
         
         </el-tree>
         <el-button @click="dialogAuthVisible = false">取 消</el-button>
@@ -110,7 +110,7 @@ export default {
       list: null,
       listLoading: true,
       input:'',
-      value1:'',//最近登录时间
+      updateTime:'',//最近登录时间
       dialogFormVisible: false,//添加角色
       dialogAuthVisible:false,//授权
       menuList:[], //授权菜单列表
@@ -119,7 +119,7 @@ export default {
       editIndex:'',//修改index
       dialogVisible: false,//批量删除
       checkList:[],//角色
-      roleName:'',//角色名称 搜索用
+      roleIdSear:'',//角色ID 搜索用
       roleCode:'',//角色编码 授权用
       roleId:'',//角色id 授权用
       menuIds:[],//菜单id 授权用
@@ -137,13 +137,21 @@ export default {
   },
   methods: {
     fetchData() {
-      this.listLoading = true
-      httpRquest(this.URL.GET_ROLE,'GET',{}).then((res)=>{
+      this.listLoading = true;
+      let req = {
+        id:this.roleIdSear,
+        updateTime:this.updateTime,
+      }
+      httpRquest(this.URL.GET_ROLE,'GET',req).then((res)=>{
         console.log(res)
         this.listLoading = false;
-        this.list = res.data;
+        this.list = res.data.records;
         this.totalNum = res.data.length
       })
+    },
+    reset(){
+      this.roleIdSear = '';
+      this.updateTime = '';
     },
     handleClose(done) {
         this.$confirm('确认关闭？')
@@ -190,7 +198,7 @@ export default {
         console.log(res.data)
         if(res.code == 0){
           this.$message({
-            message: '授权成功',
+            message: '授权成功,请重新登录',
             type: 'success'
           });
         }
@@ -231,8 +239,14 @@ export default {
         }
         httpRquest(this.URL.ROLE_UPDATE,'POST',req).then((res)=>{
             console.log(res);
-            Vue.set(this.list,this.editIndex,res.data)
-            this.dialogFormVisible = false
+            if(res.code == 0){
+              this.$message({
+                message: res.msg,
+                type: 'success'
+              });
+              Vue.set(this.list,this.editIndex,res.data)
+              this.dialogFormVisible = false
+            }
           })
       }else{
         let req = {
@@ -242,8 +256,14 @@ export default {
       }
       httpRquest(this.URL.ROLE_ADD,'POST',req).then((res)=>{
           console.log(res);
-          this.list.unshift(res.data);
-          this.dialogFormVisible = false
+          if(res.code == 0){
+              this.$message({
+                message: res.msg,
+                type: 'success'
+              });
+              this.list.unshift(res.data);
+              this.dialogFormVisible = false
+          }
         })
       }
       

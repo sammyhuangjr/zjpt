@@ -46,59 +46,18 @@ service.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
-    // let getCookies = function(name){
-    //   var v = window.document.cookie.match('^|;?' + name + '=([^;]*)(;|$)');
-    //   return v ? v[2] : null;
-    // } 
-    // let getCookies = function(cookiename) {
-    //   var result;
-    //   var mycookie = document.cookie;
-    //   var start2 = mycookie.indexOf(cookiename + "=");
-    //   if (start2 > -1) {
-    //   start = mycookie.indexOf("=", start2) + 1;
-    //   var end = mycookie.indexOf(";", start);
-      
-    //   if (end == -1) {
-    //   end = mycookie.length;
-    //   }
-      
-    //   result = unescape(mycookie.substring(start, end));
-    //   }
-      
-    //   return result;
-    //   }
-    // let getCookies = function (cname) {
-    //           var name = cname + "=";
-    //           var ca = document.cookie.split(';');
-    //           console.log("获取cookie,现在循环")
-    //           for (var i = 0; i < ca.length; i++) {
-    //             var c = ca[i];
-    //             console.log(c)
-    //             while (c.charAt(0) == ' ') c = c.substring(1);
-    //             if (c.indexOf(name) != -1){
-    //               return c.substring(name.length, c.length);
-    //             }
-    //           }
-    //           return "";
-    //         }
     const res = response.data
-    // if (response.data.returnCode == 0) {
-    //   if (response.data.bean) {
-    //      let cookie  = response.headers.cookie;
-    //      console.log(cookie);
-    //      //校验自定义headers，通过则进行下一步操作
-    //     } else {
-    //       console.log('失败');
-    //     }
-    // } else {
-    //     console.log(777777)
-    // }
+
     if(res.code == 605){
-      Message({
-        message: res.msg || 'Error',
-        type: 'error',
-        duration: 5 * 1000
-      })
+      if(store.getters.token){
+        Message({
+          message: res.msg || 'Error',
+          type: 'error',
+          duration: 5 * 1000
+        })
+      }
+      store.dispatch('user/logout')
+      store.dispatch('app/clearRouters');
       router.push({ path: '/login' })
     }
     // // if the custom code is not 20000, it is judged as an error.
@@ -133,6 +92,8 @@ service.interceptors.response.use(
       type: 'error',
       duration: 5 * 1000
     })
+  
+   
     return Promise.reject(error)
   }
 )

@@ -3,18 +3,21 @@
 */
 var api = {
     LOGIN:'/login',//登录
+    GET_CODE:'/public/getVerifyCode',//获取验证码
+    GET_PERMISSION:'/sysMenu/getMenuByRole',//获取权限
     MENU:'/sysMenu/getMenuTree',//获取菜单权限列表
     ADD: '/platform/add', // 新增平台
     AGENT_LIST:'/agent/page',//代理商列表
     AGENT_ADD:'/agent/add',//新增代理商
     AGENT_UPDATE:'/agent/update',//代理商编辑
-    PLATFORM:'/agent/pagePlatform',//代理商授权平台
-    PAGE:'/platform/page',//平台列表
+    PLATFORM:'/agent/pagePlatform',//代理商授权平台 弃用
+    PLATFORM_NEW:'/platform/getAll',//代理商授权平台
+    PAGE:'/platform/page',//平台列表 
     UPDATE:'/platform/update',//平台编辑
     DELETE:'/platform/delete',//平台删除
     AGENT_RECHARGE:'/agent/recharge/add',//代理商充值
     AGENT_RECORD:'/agent/recharge/page', //代理商充值记录
-    UPLOAD:'/platform/upload',//上传
+    UPLOAD:'/public/upload',//上传
     DEVICE_ADD:'/device/authRecord/add',//新增设备授权
     CHECK_SN:'/device/authRecord/isAuthBySn',//校验设备sn
     DEVICE_LIST:'/device/authRecord/page',//设备授权管理列表
@@ -32,6 +35,7 @@ var api = {
     GET_ROUTER:'/sysMenu/getUserMenu',//获取侧边栏
     MENU_UPDATE:'/sysMenu/update',//修改菜单
     MENU_DELETE:'/sysMenu/delete',//删除菜单
+    GETPLAT_BYID:'/platform/getListByAgentId',//根据代理商获取平台
 }
 
 import axios from 'axios'

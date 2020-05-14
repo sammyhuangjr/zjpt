@@ -1,39 +1,46 @@
 <template>
   <div class="app-container">
     <div class="ctx">
-      <span>代理商名称：</span><el-input v-model="nameInput" placeholder="请输入" class="h_input" type="text"></el-input>
-      <span>授权平台：</span>
-      <el-select v-model="platId" placeholder="请选择">
-        <el-option v-for="item in platformList" :key="item.id" :label="item.name" :value="item.id">
-        </el-option>
-      </el-select>
-      <span>创建时间：</span>
-      <div class="block">
-        <el-date-picker v-model="value1" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
-        </el-date-picker>
+      <div class="ctx_header">
+        <span>代理商名称：</span><el-input v-model="nameInput" placeholder="请输入" class="h_input" type="text"></el-input>
+        <span>授权平台：</span>
+        <el-select v-model="platId" placeholder="请选择">
+          <el-option v-for="item in platformList" :key="item.id" :label="item.name" :value="item.id">
+          </el-option>
+        </el-select>
       </div>
-      <div class="ctx_icon">
-          <el-button type="primary" icon="el-icon-search" circle @click="onSearch"></el-button>
+      <div class="ctx_header">
+        <span>创建时间：</span>
+        <div class="block">
+          <el-date-picker v-model="value1" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd">
+          </el-date-picker>
         </div>
+        <div class="ctx_icon">
+          <el-button type="primary" icon="el-icon-search" circle @click="onSearch"></el-button>
+          <el-button type="primary" icon="el-icon-refresh-right" circle @click="onReset"></el-button>
+        </div>
+      </div>
+      
     </div>
     <div class="ctx_btn">
-      <el-button type="primary"  @click="onClickAdd" plain>新增代理商</el-button>
+      <el-button  icon="el-icon-refresh" circle @click="refresh"></el-button>
+      <el-button type="primary"  @click="onClickAdd" plain v-if="hasPermission">新增代理商</el-button>
     </div>
-    <el-dialog title="新增代理商" :visible.sync="dialogFormVisible" width="600px">
+    <el-dialog :title="tip" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
-            <el-form-item class="di_input" label="代理商名称：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="代理商名称：" :label-width="formLabelWidth" required>
                 <el-input v-model="form.name" placeholder="请输入"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="联系人：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="联系人：" :label-width="formLabelWidth" required>
                 <el-input v-model="form.contact" placeholder="请输入"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="联系手机号：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="联系手机号：" :label-width="formLabelWidth" required>
                 <el-input v-model="form.contactPhone" placeholder="请输入"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="授权平台：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="授权平台：" :label-width="formLabelWidth" required>
                 <el-checkbox-group v-model="checkList" v-if="dialogFormVisible">
-                  <div v-for="(item,index) in platformList" :key="item.id">
-                    <el-checkbox :label="item.id" name="type" :checked="platformIsCheck(item)">{{item.name}}</el-checkbox>
+                  <div v-for="(item,index) in platformListCheck" :key="item.id">
+                    <el-checkbox v-if="item.id" :label="item.id" name="type" :checked="platformIsCheck(item)">{{item.name}}</el-checkbox>
                   </div>
                 </el-checkbox-group>
             </el-form-item>
@@ -79,9 +86,9 @@
       </el-table-column>
       <el-table-column align="center" prop="created_at" label="操作" show-overflow-tooltip>
         <template slot-scope="scope">
-          <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small">编辑</el-button>
+          <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small" v-if="editPer">编辑</el-button>
           <el-button type="text" @click="onClickRecord(scope.row)" size="small">充值记录</el-button>
-          <el-button type="text" @click="onClickRecharge(scope.row,scope.$index)" size="small">充值</el-button>
+          <el-button type="text" @click="onClickRecharge(scope.row,scope.$index)" size="small" v-if="rechargePer">充值</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -133,7 +140,8 @@
 import Vue from 'vue'
 import { getList } from '@/api/table'
 import { httpRquest } from '@/api/URL'
-
+import store from '@/store'
+import { checkPhone } from '@/utils/index'
 export default {
   filters: {
     statusFilter(status) {
@@ -148,12 +156,13 @@ export default {
   data() {
     return {
       totalNum:0,
+      tip:'',//对话框标题
       list: null,
       listLoading: true,
       value1: '',//时间范围选择
       startSearchTime:'',//开始时间
       endSearchTime:'',//结束时间
-      platId:'',//平台选择id
+      platId:null,//平台选择id
       dialogFormVisible: false,
       dialogRechargeVisible:false,
       dialogRecordVisible:false,
@@ -171,6 +180,7 @@ export default {
           contact:'',
           contactPhone:'',
           platform:[],
+          platformListCheck:[],
       },
       rechargeForm: {
         name:'',
@@ -182,28 +192,73 @@ export default {
       options:[],
       value:'',
       checkList:[],
-      platformList:[]
+      platformList:[],
+      platformListCheck:[],//授权平台 打勾用
+      hasPermission:false,//是否有权限
+      rechargePer:false,//是否有充值权限
+      editPer:false,//是否有编辑权限
+      rules:{
+        name:{ type: 'number', message: '年龄必须为数字值'}
+      }
     }
   },
   created() {
-    this.fetchData()
+    this.fetchData();
+    this.getPermission();
+    this.isAdminCheck();
   },
   methods: {
     fetchData() {
       this.listLoading = true
       this.getAgentList();
-      this.newGet(this.URL.PLATFORM).then((res)=>{
+      httpRquest(this.URL.PLATFORM_NEW,'GET',{}).then((res)=>{
         //获取授权平台
         console.log('=====>',res);
         this.platformList = res.data;
+        this.platformListCheck = res.data;
         this.form.totalPlat = res.data;
+        let temp = {
+          name:'全部',
+          id:'',
+        };
+        this.platformList.push(temp);
+        // this.form.totalPlat.push(temp);
       })
-      httpRquest(this.URL.PLATFORM,'GET',{}).then((res)=>{
-        //获取授权平台
-        console.log('=====>',res);
-        this.platformList = res.data;
-        this.form.totalPlat = res.data;
-      })
+    },
+    //重置
+    onReset(){
+      this.nameInput = '';
+      this.platId = '';
+      this.startSearchTime = '';
+      this.endSearchTime = '';
+    },
+    isAdminCheck(){
+      let role = localStorage.getItem('roleCode');
+      console.log(role)
+      if(role == 'ROLE_ADMIN'){
+        this.editPer = true;
+      }
+    },
+    
+    getPermission(){
+      let permission = JSON.parse(localStorage.getItem('permission'));
+      console.log(permission);
+      for(let i in permission){
+        if(permission[i].permission == 'agaent:add'){
+          this.hasPermission = true;
+        }
+        if(permission[i].permission == 'agaent:recharge'){
+          this.rechargePer = true;
+        }
+        if(permission[i].permission == 'agaent:edit'){
+          this.editPer = true;
+        }
+      }
+      console.log(this.hasPermission)
+    },
+    //刷新
+    refresh(){
+      this.getAgentList();
     },
     //获取代理商列表
     getAgentList(){
@@ -249,13 +304,23 @@ export default {
     //新增代理商
     onClickAdd(){
       // this.form.platform = this.totalPlat;
+      this.isEdit = false;
+      this.tip = '新增代理商';
+      this.form = {
+          name: '',
+          contact:'',
+          contactPhone:'',
+          platform:[],
+          platformListCheck:[],
+      },
+      this.checkList = [];
       this.dialogFormVisible = true;
     },
     //充值记录
     onClickRecord(e){
       this.dialogRecordVisible = true;
       let req = {
-        id:e.id
+        agentId:e.id
       }
       httpRquest(this.URL.AGENT_RECORD,'GET',req).then((res)=>{
         console.log(res);
@@ -267,9 +332,10 @@ export default {
     //充值
     onClickRecharge(e,index){
       console.log(e);
-      this.dialogRechargeVisible = true;
+      this.editIndex = index;
       this.rechargeForm = e;
       this.rechargeId = e.id;
+      this.dialogRechargeVisible = true;
     },
     //充值提交
     rechargeSub(){
@@ -281,7 +347,7 @@ export default {
       httpRquest(this.URL.AGENT_RECHARGE,'post',req).then((res)=>{
         console.log(res);
         if(res.code == 0){
-          this.list
+          Vue.set(this.list,this.editIndex,res.data)
           this.dialogRechargeVisible = false;
         }
       })
@@ -289,6 +355,7 @@ export default {
     //编辑代理商
     editClick(e,index){ 
       this.checkList = [];
+      this.tip = '编辑代理商';
       this.dialogFormVisible = true;
       this.form = e;
       this.editId = e.id;
@@ -305,12 +372,27 @@ export default {
     onClickSubmit(){
       let ids = this.checkList.join(',');
       let that = this;
+      if(!this.form.contact || !this.form.name || !this.form.contactPhone){
+        this.$message({
+          message: '必选项不能为空',
+          type: 'error'
+        });
+        return;
+      }
+      if(!checkPhone(this.form.phone)){
+        this.$message({
+          message: '请输入正确的手机号码',
+          type: 'error'
+        });
+        return;
+      }
       if(this.isEdit){ //编辑
         var req = {
           contact:this.form.contact,
           id:this.editId,
           contactPhone:this.form.contactPhone,
-          platformIds:ids
+          platformIds:ids,
+          name:this.form.name,
         }
         httpRquest(this.URL.AGENT_UPDATE,'post',req).then((res)=>{
           console.log(res);
@@ -320,8 +402,12 @@ export default {
             // });
             Vue.set(this.list,this.editIndex,res.data)
             this.dialogFormVisible = false;
+          }else{
+            this.$message({
+              message: res.msg,
+              type: 'error'
+            });
           }
-          console.log(this.list)
         })
       }else{  //新增
         var req = {
@@ -335,6 +421,11 @@ export default {
           if(res.code == 0){
             this.list.unshift(res.data);
             this.dialogFormVisible = false;
+          }else{
+            this.$message({
+              message: res.msg,
+              type: 'error'
+            });
           }
         })
       }
@@ -354,10 +445,17 @@ export default {
 </script>
 <style lang="scss" scoped>
   .ctx{
-    display: flex;
-    align-items: center;
-    width: 100%;
-    margin-bottom: 20px;
+    // display: flex;
+    // align-items: center;
+    // width: 100%;
+    // margin-bottom: 20px;
+    .ctx_header{
+      width: 100%;
+      margin-left: 20px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
     .h_input{
       width: 150px;
     }
@@ -372,7 +470,7 @@ export default {
     // }
   }
   .ctx_t{
-    width: 100%;
+    width: 95%;
     margin-left: 20px;
   }
   .ctx_btn{

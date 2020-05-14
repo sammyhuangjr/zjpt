@@ -105,3 +105,20 @@ export function param2Obj(url) {
       '"}'
   )
 }
+
+export function checkBuyerno(buyertaxno){
+    var reg = new RegExp(/^[\d\w]+$/);
+//     if(!reg.test(buyertaxno)){
+//           //失败提示
+//         return false;
+//     }
+    return /^[\d\w]+$/.test(buyertaxno);
+  
+  }
+  
+  export function checkPhone(phone){
+    var reg = new RegExp(/^(((13[0-9]{1})|(15[0-9]{1})|(16[0-9]{1})|(17[3-8]{1})|(18[0-9]{1})|(19[0-9]{1})|(14[5-7]{1}))+\d{8})$/);
+
+    return reg.test(phone);
+  }
+  

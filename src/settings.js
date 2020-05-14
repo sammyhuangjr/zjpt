@@ -1,6 +1,6 @@
 module.exports = {
 
-  title: '住建授权平台',
+  title: '智建云授权系统',
 
   /**
    * @type {boolean} true | false

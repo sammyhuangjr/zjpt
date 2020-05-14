@@ -2,10 +2,14 @@
   <div class="app-container">
     <div class="ctx_header">
         <span>设备sn：</span><el-input v-model="snInput" placeholder="请输入" class="h_input" type="text"></el-input>
-        <span>接入平台：</span><el-input v-model="platformInput" placeholder="请输入" class="h_input" type="text"></el-input>
+        <span>接入平台：</span>
+        <el-select v-model="platId" placeholder="请选择">
+          <el-option v-for="item in platformList" :key="item.id" :label="item.name" :value="item.id">
+          </el-option>
+        </el-select>
         <div class="ctx_icon">
-          <el-button type="primary" icon="el-icon-refresh-right" circle @click="onReset"></el-button>
           <el-button type="primary" icon="el-icon-search" circle @click="onSearch"></el-button>
+          <el-button type="primary" icon="el-icon-refresh-right" circle @click="onReset"></el-button>
         </div>
     </div>
     <el-dialog title="查看设备授权详情" :visible.sync="dialogDetailFormVisible" width="600px">
@@ -31,13 +35,13 @@
         </el-form>
     </el-dialog>
     <div class="ctx_btn">
-      <el-button  icon="el-icon-refresh" circle></el-button>
-      <el-button type="primary" @click="onClickAuth" plain>设备授权</el-button>
+      <el-button  icon="el-icon-refresh" circle @click="refresh"></el-button>
+      <el-button type="primary" @click="onClickAuth" plain v-if="hasPermission">设备授权</el-button>
     </div>
     <el-dialog title="设备授权" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
             <el-form-item class="di_input" label="所属代理：" :label-width="formLabelWidth">
-                <el-select v-model="form.agentId" placeholder="请选择所属代理商" style="width:380px">
+                <el-select v-model="form.agentId" placeholder="请选择所属代理商" style="width:380px" @change="getPlatById">
                     <el-option v-for="item in agentList" :key="item.id" :label="item.name" :value="item.id">
                     </el-option>
                 </el-select>
@@ -47,7 +51,7 @@
             </el-form-item>
             <el-form-item class="di_input" label="接入平台：" :label-width="formLabelWidth">
                 <el-select v-model="form.platformId" placeholder="请选择接入的平台" style="width:380px">
-                    <el-option v-for="item in platformList" :key="item.id" :label="item.name" :value="item.id">
+                    <el-option v-for="item in platformListById" :key="item.id" :label="item.name" :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
@@ -94,7 +98,7 @@
       <el-table-column align="center" label="操作" width="300">
         <template slot-scope="scope">
           <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
-          <el-button type="text" size="small" @click="onClickDelete(scope.row,scope.$index)">删除</el-button>
+          <el-button type="text" size="small" @click="onClickDelete(scope.row,scope.$index)" v-if="hasDeletePer">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -132,6 +136,8 @@ export default {
       listPage:1,//当前页数
       currentPage:1,
       platformList:[],//平台列表
+      platformListById:[],//平台列表 根据代理商查询
+      platId:null,//平台选择id
       agentList:[],//代理商列表
       sn:'',//设备sn
       form: {
@@ -151,20 +157,23 @@ export default {
           agentId:'',
           platformId:'',
       },
-      formLabelWidth: '120px'
+      formLabelWidth: '120px',
+      hasPermission:false,//
+      hasDeletePer:false,//删除权限
     }
   },
   created() {
     this.fetchData();
     this.getPlatformList(); //获取平台列表
     this.getAgentList();  //获取代理商列表
+    this.getPermission();
   },
   methods: {
     fetchData() {
       this.listLoading = true
       let req = {
         sn:this.snInput,
-        name:this.platformInput,
+        platformId:this.platId,
         page:this.listPage,
         limit:20
       }
@@ -173,6 +182,35 @@ export default {
         this.list = res.data.records;
         this.listLoading = false;
       })
+    },
+    //根据代理商查询平台
+    getPlatById(){
+      let req = {
+        agentId:this.form.agentId
+      }
+      httpRquest(this.URL.PLATFORM_NEW,'GET',req).then((res)=>{
+        console.log(res)
+        this.platformListById = res.data;
+      })
+    },
+    getPermission(){
+      let permission = JSON.parse(localStorage.getItem('permission'));
+      console.log(permission);
+      for(let i in permission){
+        if(permission[i].permission == 'device:add'){
+          this.hasPermission = true;
+          }
+        if(permission[i].permission == 'device:delete'){
+          this.hasDeletePer = true;
+        }
+
+        
+      }
+    },
+    //刷新
+    refresh(){
+      this.page = 1;
+      this.fetchData();
     },
     //上一页
     onClickPre(){
@@ -278,7 +316,14 @@ export default {
     //设备授权
     async onClickSubmit(){
       await this.checkSn();
-      console.log(66)
+      this.form.sn = this.form.sn.replace(/\s+/g,"");
+      if(!this.form.agentId || !this.form.platformId || !this.form.sn){{
+        this.$message({
+            message: '必选项不能为空',
+            type: 'error'
+          });
+          return;
+      }}
       let req = {
         agentId:this.form.agentId,
         platformId:this.form.platformId,
@@ -297,7 +342,7 @@ export default {
           this.dialogFormVisible = false;
         }else{
           this.$message({
-            message: res.message,
+            message: res.msg,
             type: 'warning'
           });
         }

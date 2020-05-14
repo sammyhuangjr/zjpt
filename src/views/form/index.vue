@@ -3,26 +3,26 @@
     <div class="ctx_header">
         <span>平台名称：</span><el-input v-model="platformInput" placeholder="请输入" class="h_input" type="text"></el-input>
         <div class="ctx_icon">
-          <el-button type="primary" icon="el-icon-refresh-right" circle @click="onReset"></el-button>
           <el-button type="primary" icon="el-icon-search" circle @click="onSearch"></el-button>
+          <el-button type="primary" icon="el-icon-refresh-right" circle @click="onReset"></el-button>
         </div>
     </div>
     <div class="ctx_btn">
-      <el-button  icon="el-icon-refresh" circle></el-button>
-      <el-button type="primary"  @click="onClickForm" plain>新增平台</el-button>
+      <el-button  icon="el-icon-refresh" circle @click="refresh"></el-button>
+      <el-button type="primary"  @click="onClickForm" plain v-if="hasPermission">新增平台</el-button>
     </div>
-    <el-dialog title="新增平台" :visible.sync="dialogFormVisible" width="600px">
+    <el-dialog :title="tip" :visible.sync="dialogFormVisible" width="600px" @closed="onCancel">
         <el-form :model="form">
-            <el-form-item class="di_input" label="平台名称：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="平台名称：" :label-width="formLabelWidth" required>
                 <el-input v-model="form.name" placeholder="请输入平台名称"></el-input>
             </el-form-item>
-            <el-form-item class="di_input uploadItem" label="对接软件：" :label-width="formLabelWidth">
+            <el-form-item class="di_input uploadItem" label="对接软件：" :label-width="formLabelWidth" required>
                 <!-- <el-input v-model="form.downloadUrl" placeholder="请上传对接该平台的交互软件" :disabled="true"></el-input> -->
-                <el-upload class="upload-demo" :action="uploadUrl"  :multiple="false" :limit="1" :file-list="fileList" :on-success="uploadSuccess">
+                <el-upload class="upload-demo" :action="uploadUrl"  :multiple="false" :limit="1" :file-list="fileList" :on-success="uploadSuccess" :before-upload="uploadBef"  v-loading="listLoading">
                   <el-button size="small" type="primary">点击上传</el-button>
                 </el-upload>
             </el-form-item>
-            <el-form-item class="di_input" label="版本号：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="版本号：" :label-width="formLabelWidth" required>
                 <el-input v-model="form.vcode" placeholder="请输入上传对接软件的版本号"></el-input>
             </el-form-item>
             <el-form-item class="di_input" label="备注：" :label-width="formLabelWidth">
@@ -30,7 +30,7 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button @click="onCancel">取 消</el-button>
             <el-button type="primary" @click="onClickSubmit">提 交</el-button>
         </div>
     </el-dialog>
@@ -70,7 +70,7 @@
       <el-table-column align="center" label="操作" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small">编辑</el-button>
-          <el-button @click="deleteClick(scope.row,scope.$index)" type="text" size="small">删除</el-button>
+          <el-button @click="deleteClick(scope.row,scope.$index)" type="text" size="small"  v-if="hasDeletePer">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -99,12 +99,13 @@ export default {
     return {
       list: null, //平台列表
       totalNum:0,
+      tip:'',//对话框标题
       listLoading: true,
       platformInput:'',
       isEdit:false,
       editId:'',//编辑id
       editIndex:0,//编辑index
-      fileList:[{name:'',url:''}],
+      fileList:[],
       dialogFormVisible: false,
       listPage:1,//当前页数
       currentPage:1,
@@ -116,27 +117,51 @@ export default {
           vcode:'',
         },
       formLabelWidth: '120px',
-      updateLabelWidth: '80px'
+      updateLabelWidth: '80px',
+      hasPermission:false,//
+      hasDeletePer:false,//删除权限
     }
   },
   created() {
     this.fetchData();
+    this.getPermission();
   },
   methods:{
     fetchData() {
-      console.log(666666666)
       this.listLoading = true
       var req = {
         page:this.listPage,
         limit:20,
         keyWord:this.platformInput,
       }
-      httpRquest(this.URL.AGENT_RECORD,'GET',req).then((res)=>{
+      httpRquest(this.URL.PAGE,'GET',req).then((res)=>{
         console.log(res)
         this.list = res.data.records;
         this.listLoading = false;
       })
 
+    },
+    getPermission(){
+      let permission = JSON.parse(localStorage.getItem('permission'));
+      console.log(permission);
+      for(let i in permission){
+        if(permission[i].permission == 'platform:add'){
+          this.hasPermission = true;
+          }
+        if(permission[i].permission == 'platform:delete'){
+          this.hasDeletePer = true;
+        }
+      }
+    },
+    //取消
+    onCancel(){
+      this.fileList = [];
+      this.dialogFormVisible = false
+    },
+    //刷新
+    refresh(){
+      this.page = 1;
+      this.fetchData();
     },
     //上一页
     onClickPre(){
@@ -156,6 +181,11 @@ export default {
     uploadSuccess(file, fileList){
       console.log(file,fileList);
       this.form.downloadUrl = file.data;
+      this.listLoading = false;
+    },
+    //上传之前
+    uploadBef(){
+      this.listLoading = true;
     },
     //搜索
     onSearch(){
@@ -186,11 +216,20 @@ export default {
     //新增
     onClickForm(){
       this.form = {};
+      this.tip = '新增平台'
+      console.log(6666666,this.tip)
       this.dialogFormVisible = true;
       this.fileList = [];
     },
     //提交
     onClickSubmit(){
+      if(!this.form.name || !this.form.vcode || !this.form.downloadUrl){
+        this.$message({
+          message: '必选项不能为空',
+          type: 'error'
+        });
+        return;
+      }
       if(this.isEdit){
         var req = {
           name:this.form.name,
@@ -207,7 +246,13 @@ export default {
               type: 'success'
             });
             this.dialogFormVisible = false;
-            this.list[editIndex] = req;
+            this.list[this.editIndex] = req;
+            this.fileList = [];
+          }else{
+            this.$message({
+              message: res.msg,
+              type: 'error'
+            });
           }
         })
       }else{
@@ -226,6 +271,12 @@ export default {
             });
             this.dialogFormVisible = false;
             this.list.unshift(res.data);
+            this.fileList = [];
+          }else{
+            this.$message({
+              message: res.msg,
+              type: 'error'
+            });
           }
         })
       }
@@ -233,11 +284,12 @@ export default {
     },
     //编辑
     editClick(e,index){
-      this.dialogFormVisible = true;
+      this.tip = '编辑平台';
       this.form = e;
       this.editId = e.id;
       this.isEdit = true;
       this.editIndex = index;
+      this.dialogFormVisible = true;
     }
   }
 }
