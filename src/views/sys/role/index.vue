@@ -77,8 +77,11 @@
         <el-tree :data="menuList" node-key="id" ref="tree" check-strictly show-checkbox @check-change="handleCheckChange" :default-checked-keys="checkedMenu">
         
         </el-tree>
-        <el-button @click="dialogAuthVisible = false">取 消</el-button>
-        <el-button type="primary" @click="onSubAuth">保 存</el-button>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogAuthVisible = false">取 消</el-button>
+            <el-button type="primary" @click="onSubAuth">保 存</el-button>
+        </div>
+        
     </el-dialog>
     <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="totalNum" @next-click="onClickNext" @prev-click="onClickPre" 
     @current-change="handleCurrentPage" :current-page.sync="currentPage">

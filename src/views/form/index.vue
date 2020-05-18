@@ -156,7 +156,8 @@ export default {
     //取消
     onCancel(){
       this.fileList = [];
-      this.dialogFormVisible = false
+      this.dialogFormVisible = false;
+      this.listLoading = false;
     },
     //刷新
     refresh(){

@@ -37,13 +37,13 @@
     </el-dialog>
     <el-dialog title="管理员添加" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
-            <el-form-item class="di_input" label="用户名：" :label-width="formLabelWidth" required>
+            <el-form-item class="di_input" label="用户名：" placeholder="请输入用户名" :label-width="formLabelWidth" required>
                 <el-input v-model="form.username"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="密码：" :label-width="formLabelWidth" required>
+            <el-form-item class="di_input" label="密码：" placeholder="请输入密码" :label-width="formLabelWidth" required>
                 <el-input v-model="form.password"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="确认密码：" :label-width="formLabelWidth" required>
+            <el-form-item class="di_input" label="确认密码：" placeholder="请在此输入密码" :label-width="formLabelWidth" required>
                 <el-input v-model="form.password1"></el-input>
             </el-form-item>
             <el-form-item class="di_input" label="所属代理商：" :label-width="formLabelWidth" required>
@@ -52,7 +52,7 @@
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item class="di_input" label="联系人电话：" :label-width="formLabelWidth" required>
+            <el-form-item class="di_input" label="联系人电话：" placeholder="请输入联系人电话" :label-width="formLabelWidth" required>
                  <el-input v-model="form.phone"></el-input>
             </el-form-item>
             <!-- <el-form-item class="di_input" label="状态：" :label-width="formLabelWidth">
@@ -92,10 +92,10 @@
     </el-dialog>
      <el-table class="ctx_table" ref="multipleTable" :data="list" tooltip-effect="dark" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
-        <el-table-column label="用户名" width="120">
+        <el-table-column label="用户名" show-overflow-tooltip>
           <template slot-scope="scope">{{ scope.row.username }}</template>
         </el-table-column>
-        <el-table-column prop="name" label="角色" width="120">
+        <el-table-column prop="name" label="角色" show-overflow-tooltip>
           <template slot-scope="scope">{{ scope.row.roleName }}</template>
         </el-table-column>
         <el-table-column prop="address" label="所属代理商" show-overflow-tooltip>
