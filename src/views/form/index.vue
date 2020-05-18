@@ -245,9 +245,11 @@ export default {
               message: '编辑成功',
               type: 'success'
             });
-            this.dialogFormVisible = false;
-            this.list[this.editIndex] = req;
+            
+            Vue.set(this.list,this.editIndex,res.data)
+            // this.list[this.editIndex] = req;
             this.fileList = [];
+            this.dialogFormVisible = false;
           }else{
             this.$message({
               message: res.msg,

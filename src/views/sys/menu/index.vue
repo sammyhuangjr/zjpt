@@ -36,16 +36,16 @@
         </div>
     </el-dialog>
      <el-table class="ctx_t" ref="multipleTable" row-key="id" v-if="list && list.length > 0" :data="list" tooltip-effect="dark" :tree-props="{children: 'children', hasChildren: 'children.length>0'}">
-        <el-table-column prop="name" label="菜单名称" width="150px" show-overflow-tooltip>
+        <el-table-column prop="name" label="菜单名称" width="200px" show-overflow-tooltip>
           <!-- <template slot-scope="scope">{{ scope.row.name }}</template> -->
         </el-table-column>
         <el-table-column prop="permission" label="权限标识" width="150px" show-overflow-tooltip>
           <!-- <template slot-scope="scope">{{ scope.row.permission }}</template> -->
         </el-table-column>
-        <el-table-column prop="path" label="菜单url" width="150px" show-overflow-tooltip>
+        <el-table-column prop="path" label="菜单url" width="100px" show-overflow-tooltip>
           <!-- <template slot-scope="scope">{{ scope.row.path }}</template> -->
         </el-table-column>
-        <el-table-column prop="sort" label="排序" width="100px" show-overflow-tooltip>
+        <el-table-column prop="sort" label="排序" width="80px" show-overflow-tooltip>
           <!-- <template slot-scope="scope">{{ scope.row.sort }}</template> -->
         </el-table-column>
         <el-table-column prop="updateTime" label="更新日期" width="150px" show-overflow-tooltip>
@@ -264,7 +264,7 @@ export default {
   .ctx_t{
     margin-top: 10px;
     width: 100%;
-    padding: 0 5%;
+    padding: 0 2.5%;
     .ctx_svg{
         width: 30px;
         height: 30px;

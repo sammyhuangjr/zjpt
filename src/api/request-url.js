@@ -36,6 +36,7 @@ var api = {
     MENU_UPDATE:'/sysMenu/update',//修改菜单
     MENU_DELETE:'/sysMenu/delete',//删除菜单
     GETPLAT_BYID:'/platform/getListByAgentId',//根据代理商获取平台
+    USER_STATUS:'/sysUser/updateStatus',//修改用户状态
 }
 
 import axios from 'axios'

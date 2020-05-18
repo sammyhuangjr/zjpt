@@ -59,13 +59,13 @@
 			<div class="icon">
 				<img src="@/assets/images/username.png" alt="">
 			</div>
-           <input type="text" placeholder="请输入用户名" v-model="loginForm.username">
+           <input type="text" placeholder="请输入用户名" v-model="loginForm.username" @keyup.enter="handleLogin">
          </div>
          <div class="form_item">
 			<div class="icon">
 				<img src="@/assets/images/password.png" alt="">
 			</div>
-           <input :type="isShowPassword ? 'text' : 'password'" placeholder="请输入密码" v-model="loginForm.password">
+           <input :type="isShowPassword ? 'text' : 'password'" placeholder="请输入密码" v-model="loginForm.password" @keyup.enter="handleLogin">
 		   <div class="icon eye" @click="onChangeShow">
 				<img v-show="isShowPassword" src='@/assets/images/eye.png' alt="">
 				<img v-show="!isShowPassword" src='@/assets/images/eye2.png' alt="">
@@ -75,7 +75,7 @@
 			<div class="icon" style="margin-left: 7.33%;">
 				<img src="@/assets/images/code.png" alt="">
 			</div>
-		   <input type="text" placeholder="请输入验证码" v-model="code">
+		   <input type="text" placeholder="请输入验证码" v-model="code" @keyup.enter="handleLogin">
 		 </div>
 		 <div class="codeItem" style="float: left;">
 		   <canvas ref='code' class="code" width="100" height="40" @click="getCode"></canvas>
@@ -164,6 +164,7 @@ export default {
             message: res.msg,
             type: 'error'
           });
+          return;
         }
         this.loading = false
         this.$store.dispatch('user/login',res.data.token);

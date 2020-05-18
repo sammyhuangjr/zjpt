@@ -61,6 +61,14 @@
       <el-table-column label="授权平台" width="95" align="center">
         <template slot-scope="scope">
           {{ scope.row.platformNum }}个
+          <el-tooltip class="toolTip" placement="right" v-if="scope.row.platform.length > 0">
+            <div slot="content">
+              <span v-for="item in scope.row.platform" :key="item.id">
+                {{item.name}}<br/>
+              </span>
+            </div>
+            <el-tag>显示</el-tag>
+          </el-tooltip>
         </template>
       </el-table-column>
       <el-table-column label="剩余授权额度" width="110" align="center">
@@ -379,13 +387,6 @@ export default {
         });
         return;
       }
-      if(!checkPhone(this.form.phone)){
-        this.$message({
-          message: '请输入正确的手机号码',
-          type: 'error'
-        });
-        return;
-      }
       if(this.isEdit){ //编辑
         var req = {
           contact:this.form.contact,
@@ -472,6 +473,9 @@ export default {
   .ctx_t{
     width: 95%;
     margin-left: 20px;
+    .showList{
+      color: #3172F7;
+    }
   }
   .ctx_btn{
     float: right;
@@ -483,5 +487,9 @@ export default {
   }
   .di_input{
       width: 500px;
+  }
+  .toolTip{
+    border: none !important;
+    background: none;
   }
 </style>

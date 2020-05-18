@@ -46,8 +46,8 @@
             <el-form-item class="di_input" label="确认密码：" :label-width="formLabelWidth" required>
                 <el-input v-model="form.password1"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="组织：" :label-width="formLabelWidth" required>
-                <el-select v-model="form.agentId" placeholder="请选择组织" style="width:380px">
+            <el-form-item class="di_input" label="所属代理商：" :label-width="formLabelWidth" required>
+                <el-select v-model="form.agentId" placeholder="请选择所属代理商" style="width:380px">
                     <el-option v-for="item in this.agentList" :key="item.id" :label="item.name" :value="item.id">
                     </el-option>
                 </el-select>
@@ -98,7 +98,7 @@
         <el-table-column prop="name" label="角色" width="120">
           <template slot-scope="scope">{{ scope.row.roleName }}</template>
         </el-table-column>
-        <el-table-column prop="address" label="组织" show-overflow-tooltip>
+        <el-table-column prop="address" label="所属代理商" show-overflow-tooltip>
           <template slot-scope="scope">{{ scope.row.agentName }}</template>
         </el-table-column>
         <el-table-column prop="address" label="联系人电话" show-overflow-tooltip>
@@ -117,22 +117,26 @@
         </el-table-column>
         <!-- <el-table-column prop="address" label="最近登录时间时间" show-overflow-tooltip>
           <template slot-scope="scope">
-            <span>{{ scope.row.display_time }}</span>
+            <span>{{ scope.row.display_time }}</span>                                                     
           </template>
         </el-table-column> -->
         <el-table-column prop="address" label="操作" show-overflow-tooltip>
             <template slot-scope="scope">
                 <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
                 <el-button type="text" size="small" @click="editClick(scope.row,scope.$index)">编辑</el-button>
+                <el-switch :active-value='1' :inactive-value='0' v-model="scope.row.status" active-color="#13ce66" inactive-color="#ff4949" @change="updateStatus(scope.row)" style="margin-left:10px"></el-switch>
             </template>
         </el-table-column>
+        <!-- <el-table-column prop="userstatus" label="用户状态" show-overflow-tooltip>
+          <el-switch v-model="status" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+        </el-table-column> -->
     </el-table>
     <el-dialog title="查看用户管理详情" :visible.sync="dialogDetailFormVisible" width="600px">
         <el-form :model="detailFrom">
             <el-form-item class="di_input" label="用户名：" :label-width="formLabelWidth">
                 {{detailFrom.username}}
             </el-form-item>
-            <el-form-item class="di_input" label="组织：" :label-width="formLabelWidth">
+            <el-form-item class="di_input" label="所属代理商：" :label-width="formLabelWidth">
                 {{detailFrom.agentName}}
             </el-form-item>
             <el-form-item class="di_input" label="联系电话：" :label-width="formLabelWidth">
@@ -188,6 +192,7 @@ export default {
       checkList:[],//角色
       page:1,//当前页数
       username:'',//用户名
+      status:0,//0冻结 1正常
       form: {
           username: '',
           password: '',
@@ -252,6 +257,25 @@ export default {
           }
       }
     },
+    //修改用户状态
+    updateStatus(e){
+      console.log(e);
+      // this.status = !this.status;
+      let req = {
+        id:e.id,
+        status:Number(e.status)
+      }
+      let msg = e.status ? '该用户已启用' :'该用户已停用';
+      let type = e.status ? 'success' : 'error';
+      httpRquest(this.URL.USER_STATUS,'GET',req).then((res)=>{
+        if(res.code == 0){
+          this.$message({
+            message: msg,
+            type: type
+          });
+        }
+      })
+    },
     //重置
     reset(){
       this.username = '';
@@ -311,13 +335,6 @@ export default {
       if(!checkBuyerno(this.form.username) || !checkBuyerno(this.form.password)){
         this.$message({
           message: '用户名或密码只能输入字母和数字',
-          type: 'error'
-        });
-        return;
-      }
-      if(!checkPhone(this.form.phone)){
-        this.$message({
-          message: '请输入正确的手机号码',
           type: 'error'
         });
         return;

@@ -230,7 +230,8 @@ export default {
     //删除
     onClickDelete(e,index){
       var req = {
-        id:e.id
+        id:e.id,
+        sn:e.sn,
       }
       httpRquest(this.URL.DEVICE_DELETE,'GET',req).then((res)=>{
         console.log(res)
@@ -374,7 +375,7 @@ export default {
   .ctx_t{
     margin-left: 20px;
     margin-top: 10px;
-    width: 100%;
+    width: 95%;
     .ctx_svg{
         width: 30px;
         height: 30px;
