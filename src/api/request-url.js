@@ -19,6 +19,7 @@ var api = {
     AGENT_RECORD:'/agent/recharge/page', //代理商充值记录
     UPLOAD:'/public/upload',//上传
     DEVICE_ADD:'/device/authRecord/add',//新增设备授权
+    DEVICE_READD:'/device/authRecord/repetitionAdd',//设备授权(sn号重复时添加)
     CHECK_SN:'/device/authRecord/isAuthBySn',//校验设备sn
     DEVICE_LIST:'/device/authRecord/page',//设备授权管理列表
     DEVICE_DELETE:'/device/authRecord/delete',//设备授权管理删除
@@ -37,6 +38,7 @@ var api = {
     MENU_DELETE:'/sysMenu/delete',//删除菜单
     GETPLAT_BYID:'/platform/getListByAgentId',//根据代理商获取平台
     USER_STATUS:'/sysUser/updateStatus',//修改用户状态
+    USER_DELETE:'/sysUser/delete',//删除用户
 }
 
 import axios from 'axios'

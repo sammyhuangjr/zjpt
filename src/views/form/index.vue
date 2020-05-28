@@ -14,7 +14,7 @@
     <el-dialog :title="tip" :visible.sync="dialogFormVisible" width="600px" @closed="onCancel">
         <el-form :model="form">
             <el-form-item class="di_input" label="平台名称：" :label-width="formLabelWidth" required>
-                <el-input v-model="form.name" placeholder="请输入平台名称"></el-input>
+                <el-input v-model="form.name" placeholder="请输入平台名称" maxlength="60"></el-input>
             </el-form-item>
             <el-form-item class="di_input uploadItem" label="对接软件：" :label-width="formLabelWidth" required>
                 <!-- <el-input v-model="form.downloadUrl" placeholder="请上传对接该平台的交互软件" :disabled="true"></el-input> -->
@@ -69,7 +69,7 @@
       </el-table-column>
       <el-table-column align="center" label="操作" show-overflow-tooltip>
         <template slot-scope="scope">
-          <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small">编辑</el-button>
+          <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small" v-if="hasEditPer">编辑</el-button>
           <el-button @click="deleteClick(scope.row,scope.$index)" type="text" size="small"  v-if="hasDeletePer">删除</el-button>
         </template>
       </el-table-column>
@@ -82,6 +82,7 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import { getList } from '@/api/table'
 import { httpRquest } from '@/api/URL'
 export default {
@@ -120,6 +121,8 @@ export default {
       updateLabelWidth: '80px',
       hasPermission:false,//
       hasDeletePer:false,//删除权限
+      hasEditPer:false,//编辑权限
+      isClick:false,
     }
   },
   created() {
@@ -137,7 +140,9 @@ export default {
       httpRquest(this.URL.PAGE,'GET',req).then((res)=>{
         console.log(res)
         this.list = res.data.records;
+        this.totalNum = res.data.total;
         this.listLoading = false;
+        
       })
 
     },
@@ -151,11 +156,15 @@ export default {
         if(permission[i].permission == 'platform:delete'){
           this.hasDeletePer = true;
         }
+        if(permission[i].permission == 'platform:edit'){
+          this.hasEditPer = true;
+        }
       }
     },
     //取消
     onCancel(){
       this.fileList = [];
+      this.form = {};
       this.dialogFormVisible = false;
       this.listLoading = false;
     },
@@ -199,20 +208,31 @@ export default {
     },
     //删除
     deleteClick(e,index){
-      var req = {
-        id:e.id
-      }
-      var delUrl =  `${this.URL.DELETE}?id=${e.id} `;
-      httpRquest(delUrl,'GET',).then((res)=>{
-        console.log(res)
-        if(res.code == 0){
-          this.$message({
-            message: '删除成功',
-            type: 'success'
+      this.$confirm('是否删除该平台?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            //点击确定的操作(调用接口)
+            var req = {
+              id:e.id
+            }
+            var delUrl =  `${this.URL.DELETE}?id=${e.id} `;
+            httpRquest(delUrl,'GET',).then((res)=>{
+              console.log(res)
+              if(res.code == 0){
+                this.$message({
+                  message: '删除成功',
+                  type: 'success'
+                });
+                this.list.splice(index,1);
+                this.totalNum = this.totalNum - 1;
+              }
+            })
+          }).catch(() => {
+            //几点取消的提示
           });
-          this.list.splice(index,1);
-        }
-      })
+      
     },
     //新增
     onClickForm(){
@@ -224,6 +244,7 @@ export default {
     },
     //提交
     onClickSubmit(){
+      var that = this;
       if(!this.form.name || !this.form.vcode || !this.form.downloadUrl){
         this.$message({
           message: '必选项不能为空',
@@ -231,6 +252,10 @@ export default {
         });
         return;
       }
+      if(this.isClick){
+        return;
+      }
+      this.isClick = true;
       if(this.isEdit){
         var req = {
           name:this.form.name,
@@ -246,7 +271,6 @@ export default {
               message: '编辑成功',
               type: 'success'
             });
-            
             Vue.set(this.list,this.editIndex,res.data)
             // this.list[this.editIndex] = req;
             this.fileList = [];
@@ -257,6 +281,9 @@ export default {
               type: 'error'
             });
           }
+          setTimeout(function(){
+            that.isClick = false;
+          },1000)
         })
       }else{
         var req = {
@@ -274,6 +301,7 @@ export default {
             });
             this.dialogFormVisible = false;
             this.list.unshift(res.data);
+            this.totalNum = this.totalNum + 1;
             this.fileList = [];
           }else{
             this.$message({
@@ -281,6 +309,9 @@ export default {
               type: 'error'
             });
           }
+          setTimeout(function(){
+            that.isClick = false;
+          },1000)
         })
       }
       
@@ -288,7 +319,8 @@ export default {
     //编辑
     editClick(e,index){
       this.tip = '编辑平台';
-      this.form = e;
+      // this.form = e;
+      this.form = JSON.parse(JSON.stringify(e));
       this.editId = e.id;
       this.isEdit = true;
       this.editIndex = index;

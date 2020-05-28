@@ -207,7 +207,8 @@ export default {
     handleClick(e,index){
       this.isAddChildren = false;
       this.isEdit = true;
-      this.form = e;
+      // this.form = e;
+      this.form = JSON.parse(JSON.stringify(e));
       this.editIndex = index;
       this.form.id = e.id;
       this.dialogFormVisible = true;

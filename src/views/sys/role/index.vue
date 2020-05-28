@@ -127,6 +127,8 @@ export default {
       roleId:'',//角色id 授权用
       menuIds:[],//菜单id 授权用
       checkedMenu:[],//选中的菜单
+      isClick:false,
+      isAuthClick:false,
       form: {
           roleName:'',//角色名称
           roleCode:'',//角色编码
@@ -187,6 +189,10 @@ export default {
     },
     //授权 
     onSubAuth(){
+      if(this.isAuthClick){
+        return;
+      }
+      this.isAuthClick = true;
       let temp = this.$refs.tree.getCheckedKeys().join(',');
       let menuIdList = this.$refs.tree.getCheckedNodes();
       for(let i in menuIdList){
@@ -207,6 +213,7 @@ export default {
         }
         this.listLoading = false;
         this.dialogAuthVisible = false;
+        this.isAuthClick = false;
       })
       
     },
@@ -233,6 +240,11 @@ export default {
     },
     //新增角色
     onClickSubmit(){
+      var that = this;
+      if(this.isClick){
+        return;
+      }
+      this.isClick = true;
       if(this.isEdit){
         let req = {
           id:this.editId,
@@ -249,7 +261,10 @@ export default {
               });
               Vue.set(this.list,this.editIndex,res.data)
               this.dialogFormVisible = false
-            }
+            };
+            setTimeout(function(){
+              that.isClick = false;
+            },1000)
           })
       }else{
         let req = {
@@ -265,8 +280,12 @@ export default {
                 type: 'success'
               });
               this.list.unshift(res.data);
+              this.totalNum = this.totalNum + 1;
               this.dialogFormVisible = false
-          }
+          };
+          setTimeout(function(){
+            that.isClick = false;
+          },1000)
         })
       }
       
@@ -284,20 +303,31 @@ export default {
     },
     //角色删除
     onDelete(e,index){
-      let req = {
-        id:e.id,
-      }
-      httpRquest(this.URL.ROLE_DELETE,'GET',req).then((res)=>{
-          console.log(res);
-          if(res.data){
-            this.$message({
-              message: '删除成功',
-              type: 'success'
-            });
-            this.list.splice(index,1);
-          }
-          this.dialogFormVisible = false
-        })
+      this.$confirm('是否删除该角色?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            //点击确定的操作(调用接口)
+            let req = {
+              id:e.id,
+            }
+            httpRquest(this.URL.ROLE_DELETE,'GET',req).then((res)=>{
+                console.log(res);
+                if(res.data){
+                  this.$message({
+                    message: '删除成功',
+                    type: 'success'
+                  });
+                  this.list.splice(index,1);
+                  this.totalNum = this.totalNum - 1;
+                }
+                this.dialogFormVisible = false
+              })
+          }).catch(() => {
+            //几点取消的提示
+          });
+      
     }
   }
 }

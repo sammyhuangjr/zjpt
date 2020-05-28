@@ -1,20 +1,5 @@
 <template>
   <div class="app-container">
-    <!-- <div class="ctx_header"> -->
-        <!-- <span class="_sp">组织：</span>
-        <el-select v-model="value" placeholder="全部" class="h_arg">
-            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-        </el-select>
-        <span class="_sp">角色：</span>
-        <el-select v-model="value" placeholder="全部" class="h_arg">
-            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-            </el-option>
-        </el-select> -->
-        
-        <!-- <span class="_sp">最近登录：</span>
-        <el-date-picker v-model="lastTime" type="date" placeholder="选择日期" class="h_arg"></el-date-picker> -->
-    <!-- </div> -->
     <div class="ctx_header">
       <span class="_sp">用户名：</span><el-input v-model="username" placeholder="请输入" class="h_arg" type="text"></el-input>
         <span class="_sp">联系人电话：</span><el-input v-model="phone" placeholder="请输入" class="h_arg" type="text"></el-input>
@@ -37,36 +22,24 @@
     </el-dialog>
     <el-dialog title="管理员添加" :visible.sync="dialogFormVisible" width="600px">
         <el-form :model="form">
-            <el-form-item class="di_input" label="用户名：" placeholder="请输入用户名" :label-width="formLabelWidth" required>
-                <el-input v-model="form.username"></el-input>
+            <el-form-item class="di_input" label="用户名：" :label-width="formLabelWidth" required>
+                <el-input placeholder="请输入用户名" v-model="form.username" :disabled="isEdit ? true : false"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="密码：" placeholder="请输入密码" :label-width="formLabelWidth" required>
-                <el-input v-model="form.password"></el-input>
+            <el-form-item class="di_input" label="密码：" :label-width="formLabelWidth" required>
+                <el-input v-model="form.password"  placeholder="请输入密码"></el-input>
             </el-form-item>
-            <el-form-item class="di_input" label="确认密码：" placeholder="请在此输入密码" :label-width="formLabelWidth" required>
-                <el-input v-model="form.password1"></el-input>
+            <el-form-item class="di_input" label="确认密码："  :label-width="formLabelWidth" required>
+                <el-input v-model="form.password1" placeholder="请再次输入密码"></el-input>
             </el-form-item>
             <el-form-item class="di_input" label="所属代理商：" :label-width="formLabelWidth" required>
-                <el-select v-model="form.agentId" placeholder="请选择所属代理商" style="width:380px">
-                    <el-option v-for="item in this.agentList" :key="item.id" :label="item.name" :value="item.id">
+                <el-select v-model="form.agentId" placeholder="请选择所属代理商" style="width:380px" :disabled="isEdit ? true : false">
+                    <el-option v-for="item in this.agentList" :key="item.id" :label="item.name" :value="item.id" >
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item class="di_input" label="联系人电话：" placeholder="请输入联系人电话" :label-width="formLabelWidth" required>
-                 <el-input v-model="form.phone"></el-input>
+            <el-form-item class="di_input" label="联系人电话："  :label-width="formLabelWidth" required>
+                 <el-input v-model="form.phone" placeholder="请输入联系人电话"></el-input>
             </el-form-item>
-            <!-- <el-form-item class="di_input" label="状态：" :label-width="formLabelWidth">
-                <el-select v-model="form.name" placeholder="请选择状态" style="width:380px">
-                    <el-option v-for="item in form.name" :key="item.value" :label="item.label" :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item> -->
-            <!-- <el-form-item class="di_input" label="账号类型：" :label-width="formLabelWidth">
-                <el-select v-model="form.name" placeholder="请选择账号类型" style="width:380px">
-                    <el-option v-for="item in form.name" :key="item.value" :label="item.label" :value="item.value">
-                    </el-option>
-                </el-select>
-            </el-form-item> -->
             <el-form-item class="di_input" label="备注：" :label-width="formLabelWidth">
                 <el-input type="textarea" v-model="form.remarks"></el-input>
             </el-form-item>
@@ -77,13 +50,6 @@
                   </div>
                 </el-radio-group>
             </el-form-item>
-            <!-- <el-form-item class="di_input" label="角色：" :label-width="formLabelWidth">
-                <el-checkbox-group v-model="form.roleList">
-                  <div v-for="(item,index) in roleList" :key="item.id">
-                    <el-checkbox :label="item.id" name="type" :checked="platformIsCheck(item)">{{item.roleName}}</el-checkbox>
-                  </div>
-                </el-checkbox-group>
-            </el-form-item> -->
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -104,32 +70,19 @@
         <el-table-column prop="address" label="联系人电话" show-overflow-tooltip>
           <template slot-scope="scope">{{ scope.row.phone }}</template>
         </el-table-column>
-        <!-- <el-table-column prop="address" label="账号类型" show-overflow-tooltip>
-          <template slot-scope="scope">{{ scope.row.role }}</template>
-        </el-table-column> -->
-        <!-- <el-table-column prop="address" label="状态" show-overflow-tooltip>
-          <template slot-scope="scope">{{ scope.row.role }}</template>
-        </el-table-column> -->
         <el-table-column prop="address" label="创建时间" show-overflow-tooltip>
           <template slot-scope="scope">
             <span>{{ scope.row.createTime }}</span>
           </template>
         </el-table-column>
-        <!-- <el-table-column prop="address" label="最近登录时间时间" show-overflow-tooltip>
-          <template slot-scope="scope">
-            <span>{{ scope.row.display_time }}</span>                                                     
-          </template>
-        </el-table-column> -->
         <el-table-column prop="address" label="操作" show-overflow-tooltip>
             <template slot-scope="scope">
                 <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button>
                 <el-button type="text" size="small" @click="editClick(scope.row,scope.$index)">编辑</el-button>
+                <el-button type="text" size="small" @click="delClick(scope.row,scope.$index)">删除</el-button>
                 <el-switch :active-value='1' :inactive-value='0' v-model="scope.row.status" active-color="#13ce66" inactive-color="#ff4949" @change="updateStatus(scope.row)" style="margin-left:10px"></el-switch>
             </template>
         </el-table-column>
-        <!-- <el-table-column prop="userstatus" label="用户状态" show-overflow-tooltip>
-          <el-switch v-model="status" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
-        </el-table-column> -->
     </el-table>
     <el-dialog title="查看用户管理详情" :visible.sync="dialogDetailFormVisible" width="600px">
         <el-form :model="detailFrom">
@@ -194,11 +147,11 @@ export default {
       username:'',//用户名
       status:0,//0冻结 1正常
       form: {
-          username: '',
-          password: '',
-          password1: '',
+          username: null,
+          password: null,
+          password1: null,
           id: '',
-          phone: '',
+          phone: null,
           remarks:'',
           agent:[],
           agentId:'',
@@ -217,6 +170,7 @@ export default {
       roleList:[],//角色列表
       isAdmin:false,//是否超级管理员
       addPer:false,//新建用户权限
+      isClick:false,
     }
   },
   created() {
@@ -230,7 +184,7 @@ export default {
     fetchData() {
       this.listLoading = true;
       let req = {
-        page:this.page,
+        page:this.listPage,
         limit:20,
         username:this.username,
         phone:this.phone
@@ -281,6 +235,35 @@ export default {
       this.username = '';
       this.phone = '';
     },
+    //删除用户
+    delClick(e,index){
+      this.$confirm('是否删除该用户?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            //点击确定的操作(调用接口)
+            let req = {
+              id:e.id,
+            }
+            this.editIndex = index;
+            httpRquest(this.URL.USER_DELETE,'GET',req).then((res)=>{
+              console.log(res);
+              if(res.code == 0){
+                this.list.splice(this.editIndex,1);
+                this.totalNum = this.totalNum - 1;
+                this.$message({
+                  message: '删除成功',
+                  type: 'success'
+                });
+              }
+              
+            })
+          }).catch(() => {
+            //几点取消的提示
+          });
+      
+    },
     //刷新
     refresh(){
       this.page = 1;
@@ -325,7 +308,8 @@ export default {
     },
     //新建用户提交
     onClickSubmit(){
-      if(this.form.username == '' || !this.form.password || this.form.agentId == '' || !this.form.phone){
+      var that = this;
+      if(!this.form.username || !this.form.password || !this.form.agentId || !this.form.phone){
         this.$message({
           message: '必选项不能为空',
           type: 'error'
@@ -353,6 +337,11 @@ export default {
         });
         return;
       }
+      console.log(this.isClick);
+      if(this.isClick){
+        return;
+      }
+      this.isClick = true;
       if(this.isEdit){
         var req = {
           id:this.editId,
@@ -368,7 +357,10 @@ export default {
         httpRquest(this.URL.USER_EDIT,'POST',req,'form').then((res)=>{
           console.log(res);
           Vue.set(this.list,this.editIndex,res.data)
-          this.dialogFormVisible = false
+          this.dialogFormVisible = false;
+          setTimeout(function(){
+            that.isClick = false;
+          },1000)
         })
 
         // var formdata = new FormData();// 创建form对象
@@ -406,10 +398,20 @@ export default {
               message: res.msg,
               type: 'error'
             });
+            setTimeout(function(){
+              that.isClick = false;
+            },1000)
             return;
           }
           this.list.unshift(res.data);
-          this.dialogFormVisible = false
+          this.totalNum = this.totalNum + 1;
+          this.dialogFormVisible = false;
+          setTimeout(function(){
+            that.isClick = false;
+            console.log(this.isClick);
+            // Vue.set(this.isClick,false)
+          },1000);
+          // console.log(this.isClick);
         })
       }
       
@@ -418,7 +420,8 @@ export default {
     editClick(e,index){
       this.isEdit = true;
       this.dialogFormVisible = true
-      this.form = e;
+      // this.form = e;
+      this.form = JSON.parse(JSON.stringify(e));
       this.editId = e.id;
       this.editIndex = index;
     },

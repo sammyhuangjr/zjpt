@@ -73,7 +73,7 @@
       </el-table-column>
       <el-table-column label="剩余授权额度" width="110" align="center">
         <template slot-scope="scope">
-          <span>{{ scope.row.surplusQuata }}</span>
+          <span>{{ scope.row.surplusQuata }}/{{ scope.row.quota }}</span>
         </template>
       </el-table-column>
       <el-table-column label="联系人" width="130" align="center">
@@ -95,7 +95,7 @@
       <el-table-column align="center" prop="created_at" label="操作" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-button @click="editClick(scope.row,scope.$index)" type="text" size="small" v-if="editPer">编辑</el-button>
-          <el-button type="text" @click="onClickRecord(scope.row)" size="small">充值记录</el-button>
+          <el-button type="text" @click="onClickRecord(scope.row)" size="small" v-if="recordPer">充值记录</el-button>
           <el-button type="text" @click="onClickRecharge(scope.row,scope.$index)" size="small" v-if="rechargePer">充值</el-button>
         </template>
       </el-table-column>
@@ -117,7 +117,11 @@
             <el-button type="primary" @click="rechargeSub">提 交</el-button>
         </div>
     </el-dialog>
-    <el-dialog title="充值记录" :visible.sync="dialogRecordVisible" width="800px">
+    <el-dialog title="充值记录" :visible.sync="dialogRecordVisible" width="800px" @close="record_close">
+        <div class="record_search">
+          <el-input v-model="recordInput" placeholder="请输入" class="searchInput" type="text" @keyup.enter.native="onSearchRecord"></el-input>
+          <el-button type="primary" icon="el-icon-search" circle @click="onSearchRecord"></el-button>
+        </div>
         <el-table class="ctx_table" ref="recordTable" :data="record" tooltip-effect="dark">
           <el-table-column label="序号" width="120">
             <template slot-scope="scope">{{ scope.$index + 1 }}</template>
@@ -137,7 +141,10 @@
             <template slot-scope="scope">{{ scope.row.remarks }}</template>
           </el-table-column>
       </el-table>
-    </el-dialog>
+      <el-pagination class="ctx_foot" :page-size="10" :pager-count="5" layout="prev, pager, next" :total="record_total" @next-click="onRecordNext" @prev-click="onRecordPre" 
+      @current-change="handleRecordCurrentPage" :current-page.sync="RecordcurrentPage">
+      </el-pagination>
+      </el-dialog>
     <el-pagination class="ctx_foot" :page-size="20" :pager-count="5" layout="prev, pager, next" :total="totalNum" @next-click="onClickNext" @prev-click="onClickPre" 
     @current-change="handleCurrentPage" :current-page.sync="currentPage">
     </el-pagination>
@@ -166,6 +173,7 @@ export default {
       totalNum:0,
       tip:'',//对话框标题
       list: null,
+      recordInput:'',//查询充值记录
       listLoading: true,
       value1: '',//时间范围选择
       startSearchTime:'',//开始时间
@@ -182,6 +190,7 @@ export default {
       record:null,//充值记录
       listPage:1, //列表页数
       recordPage:1, //充值记录页数
+      RecordcurrentPage:1,//充值记录当前页面
       currentPage:1,
       form: {
           name: '',
@@ -200,11 +209,17 @@ export default {
       options:[],
       value:'',
       checkList:[],
+      record_page:1,//充值记录页数
+      record_total:0,//充值记录总数
+      record_id:null,//查询充值记录用代理商id
       platformList:[],
       platformListCheck:[],//授权平台 打勾用
       hasPermission:false,//是否有权限
       rechargePer:false,//是否有充值权限
       editPer:false,//是否有编辑权限
+      recordPer:false,//充值记录权限
+      isClick:false,
+      isAddClick:false,
       rules:{
         name:{ type: 'number', message: '年龄必须为数字值'}
       }
@@ -239,6 +254,7 @@ export default {
       this.platId = '';
       this.startSearchTime = '';
       this.endSearchTime = '';
+      this.value1 = '';
     },
     isAdminCheck(){
       let role = localStorage.getItem('roleCode');
@@ -261,6 +277,9 @@ export default {
         if(permission[i].permission == 'agaent:edit'){
           this.editPer = true;
         }
+        if(permission[i].permission == 'agaent:record'){
+          this.recordPer = true;
+        }
       }
       console.log(this.hasPermission)
     },
@@ -282,10 +301,25 @@ export default {
       httpRquest(this.URL.AGENT_LIST,'GET',req).then((res)=>{
         console.log(res);
         this.list = res.data.records;
+        this.totalNum = res.data.total
         this.listLoading = false;
         // this.listPage = this.listPage + 1;
-        this.totalNum = res.data.total
       })
+    },
+    //充值记录下一页
+    onRecordNext(){
+      this.record_page = this.record_page + 1;
+      this.onClickRecord();
+    },
+    //充值记录上一页
+    onRecordPre(){
+      this.record_page = this.record_page - 1;
+      this.onClickRecord();
+    },
+    //充值记录当前页面
+    handleRecordCurrentPage(){
+      this.record_page = this.RecordcurrentPage;
+      this.onClickRecord();
     },
     //上一页
     onClickPre(){
@@ -324,16 +358,35 @@ export default {
       this.checkList = [];
       this.dialogFormVisible = true;
     },
+    //关闭充值记录
+    record_close(){
+      this.dialogRecordVisible = false;
+      this.record_page = 1;
+    },
+    onSearchRecord(){
+      this.record_page = 1;
+      this.onClickRecord();
+    },
     //充值记录
     onClickRecord(e){
+      console.log(this.record_page)
+      if(e && e.id){
+        this.record_id = e.id;
+      }
       this.dialogRecordVisible = true;
       let req = {
-        agentId:e.id
+        agentId:this.record_id,
+        page:this.record_page,
+        limit:10,
+        keyword:this.recordInput,
       }
       httpRquest(this.URL.AGENT_RECORD,'GET',req).then((res)=>{
         console.log(res);
         if(res.code == 0){
+          this.record_total = res.data.total;
           this.record = res.data.records;
+          this.recordInput = '';
+          // this.record_page = this.record_page + 1;
         }
       })
     },
@@ -347,6 +400,27 @@ export default {
     },
     //充值提交
     rechargeSub(){
+      var that = this;
+      if(!this.rechargeForm.num){
+        this.$message({
+          message: '充值数量不能为空',
+          type: 'error'
+        });
+        return;
+      }
+      let  check = new RegExp("^[1-9]([0-9])*$").test(this.rechargeForm.num);
+      if(!check){
+        this.$message.warning({
+          showClose: true,
+          message: "请输入正整数",
+           type: "error"
+        });
+        return;
+      }
+      if(this.isClick){
+        return;
+      }
+      this.isClick = true;
       let req = {
         agentId:this.rechargeId,
         num:this.rechargeForm.num,
@@ -357,15 +431,36 @@ export default {
         if(res.code == 0){
           Vue.set(this.list,this.editIndex,res.data)
           this.dialogRechargeVisible = false;
+          this.$message({
+            message: '充值成功',
+            type: 'success'
+          });
         }
+        setTimeout(function(){
+          that.isClick = false;
+        },1000)
+        
       })
+    },
+    //监听充值数量
+    checkNum(e){
+      console.log(e);
+      let  check = new RegExp("^[1-9]([0-9])*$").test(e.target.value);
+      if(!check){
+        this.$message.warning({
+          showClose: true,
+          message: "请输入正整数",
+           type: "warning"
+        });
+      }
     },
     //编辑代理商
     editClick(e,index){ 
       this.checkList = [];
       this.tip = '编辑代理商';
       this.dialogFormVisible = true;
-      this.form = e;
+      // this.form = e;
+      this.form = JSON.parse(JSON.stringify(e));
       this.editId = e.id;
       this.isEdit = true;
       this.editIndex = index;
@@ -378,9 +473,14 @@ export default {
     },
     //提交
     onClickSubmit(){
+      var that = this;
+      if(this.isAddClick){
+        return;
+      }
+      this.isAddClick = false;
       let ids = this.checkList.join(',');
-      let that = this;
-      if(!this.form.contact || !this.form.name || !this.form.contactPhone){
+      // let that = this;
+      if(!this.form.contact || !this.form.name || !this.form.contactPhone || !ids){
         this.$message({
           message: '必选项不能为空',
           type: 'error'
@@ -409,6 +509,9 @@ export default {
               type: 'error'
             });
           }
+          setTimeout(function(){
+            that.isAddClick = false;
+          },1000)
         })
       }else{  //新增
         var req = {
@@ -421,13 +524,17 @@ export default {
           console.log(res);
           if(res.code == 0){
             this.list.unshift(res.data);
+            this.totalNum = this.totalNum + 1;
             this.dialogFormVisible = false;
           }else{
             this.$message({
               message: res.msg,
               type: 'error'
             });
-          }
+          };
+          setTimeout(function(){
+            that.isAddClick = false;
+          },1000)
         })
       }
     },
@@ -446,10 +553,6 @@ export default {
 </script>
 <style lang="scss" scoped>
   .ctx{
-    // display: flex;
-    // align-items: center;
-    // width: 100%;
-    // margin-bottom: 20px;
     .ctx_header{
       width: 100%;
       margin-left: 20px;
@@ -466,9 +569,6 @@ export default {
     .ctx_icon{
       margin-left: 20px;
     }
-    // span:nth-child(1){
-    //   margin-left: 0px;
-    // }
   }
   .ctx_t{
     width: 95%;
@@ -491,5 +591,13 @@ export default {
   .toolTip{
     border: none !important;
     background: none;
+  }
+  .record_search{
+    width: 25%;
+    float: right;
+    display: flex;
+    .searchInput{
+      margin-right: 10px;
+    }
   }
 </style>
