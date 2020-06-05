@@ -21,6 +21,8 @@ var api = {
     DEVICE_ADD:'/device/authRecord/add',//新增设备授权
     DEVICE_READD:'/device/authRecord/repetitionAdd',//设备授权(sn号重复时添加)
     CHECK_SN:'/device/authRecord/isAuthBySn',//校验设备sn
+    CHECK_SN_BATCH:'/device/authRecord/isAuthBySnList',//批量校验设备sn
+    DEVICE_ADD_BATCH:'/device/authRecord/repetitionAddList',//批量设备授权
     DEVICE_LIST:'/device/authRecord/page',//设备授权管理列表
     DEVICE_DELETE:'/device/authRecord/delete',//设备授权管理删除
     USER_LIST:'/sysUser/page',//获取用户列表
